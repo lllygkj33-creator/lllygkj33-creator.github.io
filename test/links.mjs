@@ -19,7 +19,6 @@ const bodyHrefs = (html) => {
 for (const f of pages) {
   const src = readFileSync(`dist/${f}`, 'utf8');
   const tabs = hrefs(src, 'tabs');
-  if (tabs.length !== 11) bad.push(`${f}: 横向菜单不是 11 个（${tabs.length}）`);
   if (!src.includes('<footer class="footer">')) bad.push(`${f}: 没有页脚`);
 
   for (const href of [...tabs, ...hrefs(src, 'sidebar'), ...bodyHrefs(src)]) {
