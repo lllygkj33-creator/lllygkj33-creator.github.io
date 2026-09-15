@@ -58,5 +58,5 @@ updated: 2026-09-15
 
 ## Next steps
 
-- [不赌算法](/google-algorithm/respond/strategy/)：不需要反复救火的长期做法
-- [衡量](/method/process/measure/)：恢复期的数据怎么读
+- 不赌算法：不需要反复救火的长期做法
+- 衡量：恢复期的数据怎么读

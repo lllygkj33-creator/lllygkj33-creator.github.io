@@ -37,7 +37,7 @@ updated: 2026-09-15
 | 筛选/排序参数页 | 不索引，`canonical` 回主版本 |
 | 分页第二页以后 | 正常收录，但别加 `canonical` 到第一页 |
 
-工具用法：`noindex`、`canonical`、站点地图的取舍——三者的分工见[抓取与索引控制](/seo/on-page/crawl-and-index/)。
+工具用法：`noindex`、`canonical`、站点地图的取舍——三者的分工见抓取与索引控制。
 
 ## 站点地图要分组
 
@@ -56,5 +56,5 @@ updated: 2026-09-15
 
 ## Next steps
 
-- [质量门槛](/programmatic-seo/risk/quality-gate/)：哪些页面根本不该生成
-- [索引爆炸与治理](/programmatic-seo/risk/index-blowup/)：抓取被吃光之后怎么处理
+- 质量门槛：哪些页面根本不该生成
+- 索引爆炸与治理：抓取被吃光之后怎么处理

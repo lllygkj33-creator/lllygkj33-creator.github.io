@@ -29,9 +29,9 @@ AI 给出一个答案要经过四步：**检索候选 → 重排筛选 → 取�
 
 这一组的页面：
 
-- [GEO 到底在优化什么](/geo/basics/what-geo-does/)：和 SEO 的分工，以及答案里的四步链路
-- [AI 答案怎么选来源](/geo/basics/how-ai-picks-sources/)：检索、重排、引用各看什么
-- [从哪开始查](/geo/basics/where-to-start/)：先搞清楚你现在的可见度
+- GEO 到底在优化什么：和 SEO 的分工，以及答案里的四步链路
+- AI 答案怎么选来源：检索、重排、引用各看什么
+- 从哪开始查：先搞清楚你现在的可见度
 
 ## 二、站内
 
@@ -44,10 +44,10 @@ AI 给出一个答案要经过四步：**检索候选 → 重排筛选 → 取�
 
 这一组的页面：
 
-- [信息密度](/geo/on-page/information-density/)：让段落能被整段摘走
-- [llms.txt](/geo/on-page/llms-txt/)：2026 年它还值不值得做
-- [结构化数据](/geo/on-page/structured-data/)：Schema 的最小可用写法
-- [作者与实体](/geo/on-page/author-and-entity/)：署名、作者页、一致性
+- 信息密度：让段落能被整段摘走
+- llms.txt：2026 年它还值不值得做
+- 结构化数据：Schema 的最小可用写法
+- 作者与实体：署名、作者页、一致性
 
 ## 三、平台
 
@@ -55,8 +55,8 @@ AI 给出一个答案要经过四步：**检索候选 → 重排筛选 → 取�
 
 这一组的页面：
 
-- [Google AI Overviews](/geo/platforms/google-ai-overviews/)：UGC + 官方来源，和传统排名强相关
-- [ChatGPT](/geo/platforms/chatgpt/)：引用少而稳，Reddit 权重在波动
-- [Perplexity](/geo/platforms/perplexity/)：引用最多，最看重时效
-- [Gemini](/geo/platforms/gemini/)：Google 系语料，和 AI Overviews 引用不同 URL
-- [Grok](/geo/platforms/grok/)：X 内容有独特通道
+- Google AI Overviews：UGC + 官方来源，和传统排名强相关
+- ChatGPT：引用少而稳，Reddit 权重在波动
+- Perplexity：引用最多，最看重时效
+- Gemini：Google 系语料，和 AI Overviews 引用不同 URL
+- Grok：X 内容有独特通道

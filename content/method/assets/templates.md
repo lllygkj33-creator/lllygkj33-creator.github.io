@@ -53,5 +53,5 @@ updated: 2026-09-15
 
 ## Next steps
 
-- [衡量](/method/process/measure/)：复盘表怎么填
-- [执行](/method/process/execute/)：上线检查清单的完整版
+- 衡量：复盘表怎么填
+- 执行：上线检查清单的完整版

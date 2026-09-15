@@ -48,5 +48,5 @@ https://example.com/seo/on-page/information-gain/?utm_source=reddit&utm_medium=s
 
 ## Next steps
 
-- [把社区讨论变成站点内容](/xeo/pairing/ugc-to-site/)：链接之外，更耐用的一条回流通路
-- [品牌搜索](/xeo/pairing/brand-search/)：不带链接的社媒内容也在帮你的搜索表现
+- 把社区讨论变成站点内容：链接之外，更耐用的一条回流通路
+- 品牌搜索：不带链接的社媒内容也在帮你的搜索表现

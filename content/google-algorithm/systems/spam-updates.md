@@ -34,7 +34,7 @@ updated: 2026-09-15
 3. 保留处理记录（改了什么、什么时候）
 4. 观察 2-6 周，通常比核心更新的恢复快
 
-具体处理顺序见[索引爆炸与治理](/programmatic-seo/risk/index-blowup/)。
+具体处理顺序见索引爆炸与治理。
 
 ## 红线清单
 
@@ -53,5 +53,5 @@ updated: 2026-09-15
 
 ## Next steps
 
-- [核心更新](/google-algorithm/systems/core-updates/)：和垃圾更新的区别在哪
-- [不赌算法](/google-algorithm/respond/strategy/)：长期不需要靠边界试探的做法
+- 核心更新：和垃圾更新的区别在哪
+- 不赌算法：长期不需要靠边界试探的做法

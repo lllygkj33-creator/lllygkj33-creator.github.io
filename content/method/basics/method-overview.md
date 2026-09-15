@@ -37,5 +37,5 @@ updated: 2026-09-15
 
 ## Next steps
 
-- [优先级排序](/method/basics/priority-order/)：诊断之后先动哪一块
-- [诊断](/method/process/diagnose/)：四个阶段里的第一步，具体怎么做
+- 优先级排序：诊断之后先动哪一块
+- 诊断：四个阶段里的第一步，具体怎么做

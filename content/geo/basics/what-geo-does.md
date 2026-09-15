@@ -37,5 +37,5 @@ updated: 2026-09-15
 
 ## Next steps
 
-- [AI 答案怎么选来源](/geo/basics/how-ai-picks-sources/)：四步链路里每一步看什么
-- [从哪开始查](/geo/basics/where-to-start/)：先量出现状，再动手
+- AI 答案怎么选来源：四步链路里每一步看什么
+- 从哪开始查：先量出现状，再动手

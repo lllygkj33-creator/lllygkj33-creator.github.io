@@ -35,5 +35,5 @@ updated: 2026-09-15
 
 ## Next steps
 
-- [从哪开始查](/geo/basics/where-to-start/)：把 Grok 也列进你的月度提问清单
-- [作者与实体](/geo/on-page/author-and-entity/)：X 账号是实体核对最常用的一站
+- 从哪开始查：把 Grok 也列进你的月度提问清单
+- 作者与实体：X 账号是实体核对最常用的一站

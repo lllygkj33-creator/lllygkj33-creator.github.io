@@ -43,7 +43,7 @@ updated: 2026-09-15
 
 ## 三个容易忽略的检查
 
-1. **AI 爬虫有没有被挡**（GPTBot、PerplexityBot 等）——影响 GEO，见[从哪开始查](/geo/basics/where-to-start/)
+1. **AI 爬虫有没有被挡**（GPTBot、PerplexityBot 等）——影响 GEO，见从哪开始查
 2. **移动端和桌面端数据分开看**——两边的位次和点击率差异常常很大
 3. **有没有已存在的、比新内容更该修的页面**——存量页面的性价比通常高于新写
 
@@ -51,5 +51,5 @@ updated: 2026-09-15
 
 ## Next steps
 
-- [优先级排序](/method/basics/priority-order/)：拿着问题清单决定先修哪个
-- [策略](/method/process/strategy/)：诊断完了才谈做什么
+- 优先级排序：拿着问题清单决定先修哪个
+- 策略：诊断完了才谈做什么

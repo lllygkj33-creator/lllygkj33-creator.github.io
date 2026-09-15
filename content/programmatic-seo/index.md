@@ -25,9 +25,9 @@ updated: 2026-09-15
 
 这一组的页面：
 
-- [什么是程序化 SEO](/programmatic-seo/basics/what-is-pseo/)：适用与不适用的场景
-- [什么时候能用](/programmatic-seo/basics/when-to-use/)：三个前提条件
-- [政策边界](/programmatic-seo/basics/scaled-content-abuse/)：Google 到底管什么
+- 什么是程序化 SEO：适用与不适用的场景
+- 什么时候能用：三个前提条件
+- 政策边界：Google 到底管什么
 
 ## 二、执行
 
@@ -40,9 +40,9 @@ updated: 2026-09-15
 
 这一组的页面：
 
-- [数据源与结构化](/programmatic-seo/build/data-sources/)：先有数据，再谈生成
-- [模板与 URL 设计](/programmatic-seo/build/template-and-url/)：怎么让每页不重复
-- [内链与索引控制](/programmatic-seo/build/internal-links-and-index/)：放量的同时管住索引
+- 数据源与结构化：先有数据，再谈生成
+- 模板与 URL 设计：怎么让每页不重复
+- 内链与索引控制：放量的同时管住索引
 
 ## 三、风险
 
@@ -53,5 +53,5 @@ updated: 2026-09-15
 
 这一组的页面：
 
-- [质量门槛](/programmatic-seo/risk/quality-gate/)：上线的准入条件
-- [索引爆炸与治理](/programmatic-seo/risk/index-blowup/)：出事之后怎么收
+- 质量门槛：上线的准入条件
+- 索引爆炸与治理：出事之后怎么收

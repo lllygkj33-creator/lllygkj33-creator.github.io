@@ -50,5 +50,5 @@ updated: 2026-09-15
 
 ## Next steps
 
-- [有用内容系统](/google-algorithm/systems/helpful-content/)：2024 年 3 月起并入核心，是被影响时最常被引用的判断标准
-- [恢复](/google-algorithm/respond/recovery/)：恢复周期和恢复期该做的事
+- 有用内容系统：2024 年 3 月起并入核心，是被影响时最常被引用的判断标准
+- 恢复：恢复周期和恢复期该做的事

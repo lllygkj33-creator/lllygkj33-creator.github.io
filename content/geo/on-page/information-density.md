@@ -44,5 +44,5 @@ updated: 2026-09-15
 
 ## Next steps
 
-- [AI 答案怎么选来源](/geo/basics/how-ai-picks-sources/)：取段落那一步判断的就是这件事
-- [结构化数据](/geo/on-page/structured-data/)：把密度告诉机器，而不是让它自己猜
+- AI 答案怎么选来源：取段落那一步判断的就是这件事
+- 结构化数据：把密度告诉机器，而不是让它自己猜

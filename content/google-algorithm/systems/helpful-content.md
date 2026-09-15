@@ -39,7 +39,7 @@ updated: 2026-09-15
 - [ ] 站点主题集中，不是无边界地追热点
 - [ ] 没有为覆盖关键词而生成的近似页面
 
-这套清单和[信息增益](/seo/on-page/information-gain/)、[程序化 SEO 的质量门槛](/programmatic-seo/risk/quality-gate/)是同一件事在不同场景下的说法。
+这套清单和信息增益、程序化 SEO 的质量门槛是同一件事在不同场景下的说法。
 
 ## 和 GEO 的关系
 
@@ -49,5 +49,5 @@ updated: 2026-09-15
 
 ## Next steps
 
-- [核心更新](/google-algorithm/systems/core-updates/)：这套标准的载体
-- [垃圾更新与政策](/google-algorithm/systems/spam-updates/)：越过红线之后是另一套机制
+- 核心更新：这套标准的载体
+- 垃圾更新与政策：越过红线之后是另一套机制

@@ -56,5 +56,5 @@ updated: 2026-09-15
 
 ## Next steps
 
-- [核心更新](/google-algorithm/systems/core-updates/)：次数最多、影响最难处理的一类
-- [掉流量排查顺序](/google-algorithm/respond/triage/)：对照时间线判断是不是算法引起的
+- 核心更新：次数最多、影响最难处理的一类
+- 掉流量排查顺序：对照时间线判断是不是算法引起的

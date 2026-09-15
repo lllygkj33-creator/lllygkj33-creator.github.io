@@ -19,9 +19,9 @@ updated: 2026-09-15
 
 这一组的页面：
 
-- [社媒和 SEO 怎么互相帮忙](/xeo/basics/what-social-seo-does/)：两条链路，以及别指望的两件事
-- [一份素材全渠道复用](/xeo/basics/one-asset-many-channels/)：母素材、拆解矩阵、改写的三条规矩
-- [从哪开始](/xeo/basics/where-to-start/)：先选两个平台，定节奏，只看四个指标
+- 社媒和 SEO 怎么互相帮忙：两条链路，以及别指望的两件事
+- 一份素材全渠道复用：母素材、拆解矩阵、改写的三条规矩
+- 从哪开始：先选两个平台，定节奏，只看四个指标
 
 ## 二、配合
 
@@ -34,10 +34,10 @@ updated: 2026-09-15
 
 这一组的页面：
 
-- [引流路径设计](/xeo/pairing/traffic-paths/)：别把流量导到主页
-- [品牌搜索](/xeo/pairing/brand-search/)：社媒做厚，搜索端会看见
-- [把社区讨论变成站点内容](/xeo/pairing/ugc-to-site/)：从哪找、怎么用、怎么闭环
-- [分发排期](/xeo/pairing/publishing-cadence/)：一条素材的七天
+- 引流路径设计：别把流量导到主页
+- 品牌搜索：社媒做厚，搜索端会看见
+- 把社区讨论变成站点内容：从哪找、怎么用、怎么闭环
+- 分发排期：一条素材的七天
 
 ## 三、平台
 
@@ -45,9 +45,9 @@ updated: 2026-09-15
 
 这一组的页面：
 
-- [Reddit](/xeo/platforms/reddit/)：没有 hashtag，靠 subreddit 和 flair
-- [YouTube](/xeo/platforms/youtube/)：15 个 hashtag 上限，前 3 个显示在标题上方
-- [X](/xeo/platforms/x/)：找热点最快，链接不传权重
-- [Pinterest](/xeo/platforms/pinterest/)：趋势工具 + 视觉搜索
-- [Discord](/xeo/platforms/discord/)：内容不被搜索引擎收录，它是留存渠道
-- [Medium](/xeo/platforms/medium/)：高权重域名，但要处理重复内容
+- Reddit：没有 hashtag，靠 subreddit 和 flair
+- YouTube：15 个 hashtag 上限，前 3 个显示在标题上方
+- X：找热点最快，链接不传权重
+- Pinterest：趋势工具 + 视觉搜索
+- Discord：内容不被搜索引擎收录，它是留存渠道
+- Medium：高权重域名，但要处理重复内容

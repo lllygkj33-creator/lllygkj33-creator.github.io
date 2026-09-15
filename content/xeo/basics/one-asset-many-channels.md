@@ -41,5 +41,5 @@ updated: 2026-09-15
 
 ## Next steps
 
-- [分发排期](/xeo/pairing/publishing-cadence/)：拆完之后按七天排开
-- [X](/xeo/platforms/x/)：找热点最快的平台，适合做第一波扩散
+- 分发排期：拆完之后按七天排开
+- X：找热点最快的平台，适合做第一波扩散

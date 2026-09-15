@@ -50,5 +50,5 @@ updated: 2026-09-15
 
 ## Next steps
 
-- [质量门槛](/programmatic-seo/risk/quality-gate/)：把上面四个自问变成上线的硬条件
-- [索引爆炸与治理](/programmatic-seo/risk/index-blowup/)：出了问题的处理顺序
+- 质量门槛：把上面四个自问变成上线的硬条件
+- 索引爆炸与治理：出了问题的处理顺序

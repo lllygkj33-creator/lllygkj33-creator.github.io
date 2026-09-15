@@ -33,5 +33,5 @@ updated: 2026-09-15
 
 ## Next steps
 
-- [Perplexity](/geo/platforms/perplexity/)：引用数量最多的平台，打法完全不同
-- [Grok](/geo/platforms/grok/)：X 内容有独占通道
+- Perplexity：引用数量最多的平台，打法完全不同
+- Grok：X 内容有独占通道

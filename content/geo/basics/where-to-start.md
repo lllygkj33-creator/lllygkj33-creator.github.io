@@ -46,7 +46,7 @@ ClaudeBot         Anthropic
 把没被引用的词按原因分三类，对应后面的动作：
 
 - **抓不到** → 先修抓取，见上面的 UA 检查
-- **抓到了但没被引用** → 改段落形态，见[信息密度](/geo/on-page/information-density/)
+- **抓到了但没被引用** → 改段落形态，见信息密度
 - **被引用了但用的不是你的页面** → 那是内容缺口，回去做选题
 
 ## 复查节奏
@@ -57,5 +57,5 @@ ClaudeBot         Anthropic
 
 ## Next steps
 
-- [AI 答案怎么选来源](/geo/basics/how-ai-picks-sources/)：知道每一步在看什么，才知道改哪里
-- [信息密度](/geo/on-page/information-density/)：最常见的那种"抓到了但不引用"
+- AI 答案怎么选来源：知道每一步在看什么，才知道改哪里
+- 信息密度：最常见的那种"抓到了但不引用"

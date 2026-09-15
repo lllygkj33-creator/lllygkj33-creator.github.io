@@ -49,5 +49,5 @@ updated: 2026-09-15
 
 ## Next steps
 
-- [衡量](/method/process/measure/)：改了之后怎么看有没有用
-- [分发排期](/xeo/pairing/publishing-cadence/)：上线之后的社媒分发节奏
+- 衡量：改了之后怎么看有没有用
+- 分发排期：上线之后的社媒分发节奏

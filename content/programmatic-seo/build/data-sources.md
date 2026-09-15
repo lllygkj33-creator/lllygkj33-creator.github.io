@@ -59,5 +59,5 @@ updated: 2026-09-15
 
 ## Next steps
 
-- [模板与 URL 设计](/programmatic-seo/build/template-and-url/)：数据齐了才开始设计页面
-- [质量门槛](/programmatic-seo/risk/quality-gate/)：`diff` 字段为空的行怎么处理
+- 模板与 URL 设计：数据齐了才开始设计页面
+- 质量门槛：`diff` 字段为空的行怎么处理

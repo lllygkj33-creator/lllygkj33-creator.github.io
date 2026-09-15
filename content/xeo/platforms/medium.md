@@ -45,5 +45,5 @@ Medium 支持在导入时设置 canonical 链接指向原文。这样做的前�
 
 ## Next steps
 
-- [社媒和 SEO 怎么互相帮忙](/xeo/basics/what-social-seo-does/)：站外平台在搜索端的真实作用
-- [品牌搜索](/xeo/pairing/brand-search/)：Medium 作者页是实体一致性的一环
+- 社媒和 SEO 怎么互相帮忙：站外平台在搜索端的真实作用
+- 品牌搜索：Medium 作者页是实体一致性的一环

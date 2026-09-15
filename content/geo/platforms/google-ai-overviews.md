@@ -36,5 +36,5 @@ updated: 2026-09-15
 
 ## Next steps
 
-- [Perplexity](/geo/platforms/perplexity/)：另一个极端，几乎不看传统排名
-- [信息密度](/geo/on-page/information-density/)：两个平台都吃这一套
+- Perplexity：另一个极端，几乎不看传统排名
+- 信息密度：两个平台都吃这一套

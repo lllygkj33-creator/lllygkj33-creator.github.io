@@ -39,5 +39,5 @@ updated: 2026-09-15
 
 ## Next steps
 
-- [更新时间线](/google-algorithm/basics/timeline/)：具体哪几次、各自多久
-- [怎么判断自己被影响了](/google-algorithm/basics/am-i-affected/)：别把季节性当成算法
+- 更新时间线：具体哪几次、各自多久
+- 怎么判断自己被影响了：别把季节性当成算法

@@ -46,5 +46,5 @@ updated: 2026-09-15
 
 ## Next steps
 
-- [执行](/method/process/execute/)：清单怎么落地成节奏
-- [关键词研究](/seo/basics/keyword-research/)：清单里"关键词"和"意图"两列的来源
+- 执行：清单怎么落地成节奏
+- 关键词研究：清单里"关键词"和"意图"两列的来源

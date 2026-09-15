@@ -37,5 +37,5 @@ updated: 2026-01-01
 
 ## Next steps
 
-- [怎么衡量与三个误区](/seo/basics/measure-and-myths/)：点击率和平均位次要分开读
-- [信息增益](/seo/on-page/information-gain/)：标题吸引人之后，正文要接得住
+- 怎么衡量与三个误区：点击率和平均位次要分开读
+- 信息增益：标题吸引人之后，正文要接得住

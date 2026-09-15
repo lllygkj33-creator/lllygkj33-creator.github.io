@@ -39,5 +39,5 @@ updated: 2026-09-15
 
 ## Next steps
 
-- [把社区讨论变成站点内容](/xeo/pairing/ugc-to-site/)：Reddit 是最好用的选题来源
-- [YouTube](/xeo/platforms/youtube/)：另一个在 Google 里有独立排名的平台
+- 把社区讨论变成站点内容：Reddit 是最好用的选题来源
+- YouTube：另一个在 Google 里有独立排名的平台

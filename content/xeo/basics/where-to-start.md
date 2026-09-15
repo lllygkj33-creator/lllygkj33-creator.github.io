@@ -39,5 +39,5 @@ updated: 2026-09-15
 
 ## Next steps
 
-- [引流路径设计](/xeo/pairing/traffic-paths/)：链接怎么放、导到哪里
-- [一份素材全渠道复用](/xeo/basics/one-asset-many-channels/)：撑住节奏的前提
+- 引流路径设计：链接怎么放、导到哪里
+- 一份素材全渠道复用：撑住节奏的前提

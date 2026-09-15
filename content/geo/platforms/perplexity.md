@@ -35,5 +35,5 @@ updated: 2026-09-15
 
 ## Next steps
 
-- [ChatGPT](/geo/platforms/chatgpt/)：引用少一个量级，打法不同
-- [结构化数据](/geo/on-page/structured-data/)：它取的那些字段，最好显式标出来
+- ChatGPT：引用少一个量级，打法不同
+- 结构化数据：它取的那些字段，最好显式标出来

@@ -38,6 +38,6 @@ updated: 2026-09-15
 
 ## Next steps
 
-- [一份素材全渠道复用](/xeo/basics/one-asset-many-channels/)：社媒产能靠复用，不靠硬写
-- [品牌搜索](/xeo/pairing/brand-search/)：社媒唯一能直接抬的搜索指标
-- [作者与实体](/geo/on-page/author-and-entity/)：社媒账号是实体核对最常用的一站
+- 一份素材全渠道复用：社媒产能靠复用，不靠硬写
+- 品牌搜索：社媒唯一能直接抬的搜索指标
+- 作者与实体：社媒账号是实体核对最常用的一站

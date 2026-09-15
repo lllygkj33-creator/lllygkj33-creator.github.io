@@ -51,5 +51,5 @@ updated: 2026-09-15
 
 ## Next steps
 
-- [政策边界](/programmatic-seo/basics/scaled-content-abuse/)：哪些做法会被判定为滥用
-- [质量门槛](/programmatic-seo/risk/quality-gate/)：放量前每页要过的准入条件
+- 政策边界：哪些做法会被判定为滥用
+- 质量门槛：放量前每页要过的准入条件

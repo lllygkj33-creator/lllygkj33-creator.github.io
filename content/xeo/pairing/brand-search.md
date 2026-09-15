@@ -42,5 +42,5 @@ updated: 2026-09-15
 
 ## Next steps
 
-- [作者与实体](/geo/on-page/author-and-entity/)：把一致性做成检查清单
-- [引流路径设计](/xeo/pairing/traffic-paths/)：品牌搜索之外的直接访问来源
+- 作者与实体：把一致性做成检查清单
+- 引流路径设计：品牌搜索之外的直接访问来源

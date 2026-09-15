@@ -65,8 +65,8 @@ FAQ 页用 `FAQPage`：
 
 ## Next steps
 
-- [作者与实体](/geo/on-page/author-and-entity/)：`author` 字段要和作者页对得上
-- [信息密度](/geo/on-page/information-density/)：结构化数据描述的内容，本身要有东西
+- 作者与实体：`author` 字段要和作者页对得上
+- 信息密度：结构化数据描述的内容，本身要有东西
 
 ## 参考
 

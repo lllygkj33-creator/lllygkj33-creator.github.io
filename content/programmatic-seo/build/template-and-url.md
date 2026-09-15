@@ -57,5 +57,5 @@ H2：常见问题                     ← 3-4 个，来自真实提问
 
 ## Next steps
 
-- [内链与索引控制](/programmatic-seo/build/internal-links-and-index/)：页面生成了不等于该被收录
-- [索引爆炸与治理](/programmatic-seo/risk/index-blowup/)：维度加太多会出什么事
+- 内链与索引控制：页面生成了不等于该被收录
+- 索引爆炸与治理：维度加太多会出什么事

@@ -38,5 +38,5 @@ updated: 2026-01-01
 
 ## Next steps
 
-- [关键词研究](/seo/basics/keyword-research/)：把意图判断变成可派工的清单
-- [SEO 到底在优化什么](/seo/basics/what-seo-does/)：意图对得上，属于"三个条件"里的第二条
+- 关键词研究：把意图判断变成可派工的清单
+- SEO 到底在优化什么：意图对得上，属于"三个条件"里的第二条

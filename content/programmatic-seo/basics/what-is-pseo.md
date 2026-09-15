@@ -46,5 +46,5 @@ updated: 2026-09-15
 
 ## Next steps
 
-- [什么时候能用](/programmatic-seo/basics/when-to-use/)：三个前提条件，缺一不可
-- [政策边界](/programmatic-seo/basics/scaled-content-abuse/)：Google 的判定口径
+- 什么时候能用：三个前提条件，缺一不可
+- 政策边界：Google 的判定口径

@@ -39,5 +39,5 @@ updated: 2026-01-01
 
 ## Next steps
 
-- [标题与描述](/seo/on-page/title-and-description/)：有了增益，还得让人愿意点进来
-- [怎么衡量与三个误区](/seo/basics/measure-and-myths/)：原创 ≠ 有排名，原因就在这里
+- 标题与描述：有了增益，还得让人愿意点进来
+- 怎么衡量与三个误区：原创 ≠ 有排名，原因就在这里

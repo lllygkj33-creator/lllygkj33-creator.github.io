@@ -46,6 +46,6 @@ updated: 2026-09-15
 
 ## Next steps
 
-- [信息密度](/geo/on-page/information-density/)：让段落活过第三步
-- [作者与实体](/geo/on-page/author-and-entity/)：让来源更"敢引用"
-- [从哪开始查](/geo/basics/where-to-start/)：把上面这个验证固化成流程
+- 信息密度：让段落活过第三步
+- 作者与实体：让来源更"敢引用"
+- 从哪开始查：把上面这个验证固化成流程

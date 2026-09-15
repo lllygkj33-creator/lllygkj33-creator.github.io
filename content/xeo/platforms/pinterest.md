@@ -45,5 +45,5 @@ updated: 2026-09-15
 
 ## Next steps
 
-- [分发排期](/xeo/pairing/publishing-cadence/)：图钉适合排在素材发布的第 3-4 天
-- [一份素材全渠道复用](/xeo/basics/one-asset-many-channels/)：清单类内容最适合做成图
+- 分发排期：图钉适合排在素材发布的第 3-4 天
+- 一份素材全渠道复用：清单类内容最适合做成图

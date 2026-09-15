@@ -48,5 +48,5 @@ updated: 2026-09-15
 
 ## Next steps
 
-- [我的方法从哪来](/method/basics/method-overview/)：衡量之后回到诊断，形成闭环
-- [模板与检查清单](/method/assets/templates/)：把复盘固定成一张表
+- 我的方法从哪来：衡量之后回到诊断，形成闭环
+- 模板与检查清单：把复盘固定成一张表

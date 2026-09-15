@@ -32,5 +32,5 @@ updated: 2026-09-15
 
 ## Next steps
 
-- [Google AI Overviews](/geo/platforms/google-ai-overviews/)：同一个语料池，但引用要分开看
-- [从哪开始查](/geo/basics/where-to-start/)：把多平台对比固化成固定流程
+- Google AI Overviews：同一个语料池，但引用要分开看
+- 从哪开始查：把多平台对比固化成固定流程

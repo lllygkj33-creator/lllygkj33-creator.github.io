@@ -21,9 +21,9 @@ updated: 2026-09-15
 
 这一组的页面：
 
-- [更新分几类](/google-algorithm/basics/how-updates-work/)：具名更新、日常调整和"未确认"的波动
-- [更新时间线](/google-algorithm/basics/timeline/)：2011 到 2026 的具名更新，含 Google 官方推出的起止时间和天数
-- [怎么判断自己被影响了](/google-algorithm/basics/am-i-affected/)：时间对齐、同行对比、剔除季节性
+- 更新分几类：具名更新、日常调整和"未确认"的波动
+- 更新时间线：2011 到 2026 的具名更新，含 Google 官方推出的起止时间和天数
+- 怎么判断自己被影响了：时间对齐、同行对比、剔除季节性
 
 ## 二、系统
 
@@ -36,10 +36,10 @@ updated: 2026-09-15
 
 这一组的页面：
 
-- [核心更新](/google-algorithm/systems/core-updates/)：它到底在评什么
-- [有用内容系统](/google-algorithm/systems/helpful-content/)：从独立系统到并入核心
-- [垃圾更新与政策](/google-algorithm/systems/spam-updates/)：三条 2024 年新增的政策
-- [语义理解](/google-algorithm/systems/semantic-search/)：算法怎么读你的内容
+- 核心更新：它到底在评什么
+- 有用内容系统：从独立系统到并入核心
+- 垃圾更新与政策：三条 2024 年新增的政策
+- 语义理解：算法怎么读你的内容
 
 ## 三、应对
 
@@ -47,6 +47,6 @@ updated: 2026-09-15
 
 这一组的页面：
 
-- [掉流量排查顺序](/google-algorithm/respond/triage/)：算法、技术、需求、竞品四分支
-- [恢复](/google-algorithm/respond/recovery/)：恢复周期和恢复期该做什么
-- [不赌算法](/google-algorithm/respond/strategy/)：长期能做的事
+- 掉流量排查顺序：算法、技术、需求、竞品四分支
+- 恢复：恢复周期和恢复期该做什么
+- 不赌算法：长期能做的事

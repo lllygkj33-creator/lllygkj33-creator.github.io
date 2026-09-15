@@ -38,5 +38,5 @@ updated: 2026-01-01
 
 ## Next steps
 
-- [外链到底怎么起作用](/seo/off-page/how-links-work/)：有了资产，还要知道它会从哪来
-- [信息增益](/seo/on-page/information-gain/)：资产页本身就是最强的信息增益
+- 外链到底怎么起作用：有了资产，还要知道它会从哪来
+- 信息增益：资产页本身就是最强的信息增益

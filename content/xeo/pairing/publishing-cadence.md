@@ -46,5 +46,5 @@ updated: 2026-09-15
 
 ## Next steps
 
-- [一份素材全渠道复用](/xeo/basics/one-asset-many-channels/)：排期的前提是拆得开
-- [从哪开始](/xeo/basics/where-to-start/)：节奏起不来时，回到"只做两个平台"
+- 一份素材全渠道复用：排期的前提是拆得开
+- 从哪开始：节奏起不来时，回到"只做两个平台"
