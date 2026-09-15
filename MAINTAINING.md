@@ -198,3 +198,49 @@ pnpm dev          # http://localhost:4321，改文件即时刷新
 pnpm build        # 构建
 pnpm check        # 校验所有导航和正文链接
 ```
+
+---
+
+## 11. 协作：谁能改、怎么加人
+
+**公开仓库 ≠ 谁都能改。** public 只意味着任何人都能**看**和**复制一份到自己账号（fork）**；能往这个仓库提交的，只有仓库主和你邀请的协作者。
+
+### 加一个协作者
+
+1. 打开仓库 **Settings → Collaborators**（个人仓库路径：`/settings/access`）
+2. 点 **Add people**
+3. 输入对方的 GitHub 用户名、邮箱或全名，搜索并选中
+4. 选角色：
+   - **Write** —— 能提交、能触发部署。**给内容协作者就选这个**
+   - Maintain —— 额外能改部分设置
+   - Admin —— 全部权限，**包含删除仓库，不要给**
+5. 点 **Add**，对方会收到邮件邀请，**必须接受**才生效
+
+对方接受后，就能像你一样在网页上改文件、提交，提交会直接触发部署上线。
+
+### 两种协作方式，按信任程度选
+
+| 方式 | 对方能做什么 | 上线时机 |
+| --- | --- | --- |
+| 给 Write 权限 | 直接提交到 main | 提交即上线 |
+| 不给权限，走 fork + Pull Request | 在自己账号里改，提 PR | **你点 Merge 之后才上线** |
+
+因为 Pages 只从 `main` 分支部署，**Pull Request 就是天然的审核闸门**。
+
+### 建议：给 main 加保护规则
+
+即使给了 Write 权限，也可以要求"必须走 PR"：
+
+1. **Settings → Branches**（新版界面在 **Rules / Rulesets**）
+2. **Add branch protection rule**，Branch name pattern 填 `main`
+3. 勾选 **Require a pull request before merging**（可再勾需要 1 个 approval）
+4. 保存
+
+效果：任何人（包括协作者）都不能直接推 main，只能提 PR，**你批准后才合并、才上线**。你自己仍可在网页上直接编辑。
+
+### 邀请常见问题
+
+- 对方必须有 GitHub 账号
+- 邀请**没接受之前不生效**，可以在 Collaborators 页面看到待接受状态
+- 想收回权限：同一页面点 **Remove**
+- 部署失败时协作者也能在 **Actions** 页看到失败原因和日志，不用你转述
