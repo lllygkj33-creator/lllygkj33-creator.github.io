@@ -1,0 +1,14 @@
+{
+  "name": "hermes-site",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "node test/links.mjs"
+  },
+  "dependencies": {
+    "astro": "^7.3.2"
+  }
+}

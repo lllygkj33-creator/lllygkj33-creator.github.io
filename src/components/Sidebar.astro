@@ -1,0 +1,20 @@
+---
+const { groups, current } = Astro.props;
+---
+
+<nav class="sidebar" aria-label="Pages">
+  {
+    groups.map((g) => (
+      <div class="side-group">
+        {g.label && <h3>{g.label}</h3>}
+        <ul>
+          {g.pages.map((p) => (
+            <li>
+              <a href={p.url} class={p.url === current ? 'active' : undefined}>{p.title}</a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))
+  }
+</nav>

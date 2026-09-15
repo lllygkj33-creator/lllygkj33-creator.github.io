@@ -1,0 +1,157 @@
+---
+import Topbar from '../components/Topbar.astro';
+import Sidebar from '../components/Sidebar.astro';
+import '../styles/global.css';
+
+const {
+  title,
+  description = '',
+  body = '',
+  nav,
+  current,
+  activeSection,
+  sectionLabel,
+  groups,
+  headings = [],
+  prev,
+  next,
+} = Astro.props;
+
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+// 复制按钮要用的原始 markdown，塞进 JSON script 里（< 转义避免提前闭合）
+const markdown = JSON.stringify(`# ${title}\n\n${body}`).replace(/</g, '\\u003c');
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href="/logo.webp" />
+    <script is:inline>
+      const root = document.documentElement;
+      if (localStorage.getItem('toc') === 'off') root.classList.add('toc-off');
+      const theme = localStorage.getItem('theme');
+      if (theme) root.dataset.theme = theme;
+    </script>
+  </head>
+  <body>
+    <Topbar nav={nav} activeSection={activeSection} />
+
+    <div class="layout">
+      <Sidebar groups={groups} current={current} />
+
+      <main class="main">
+        {sectionLabel && <div class="eyebrow">{sectionLabel}</div>}
+
+        <div class="head-row">
+          <h1>{title}</h1>
+          <button class="copy-btn" id="copy-md" type="button">
+            <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M14.25 5.25H7.25C6.14543 5.25 5.25 6.14543 5.25 7.25V14.25C5.25 15.3546 6.14543 16.25 7.25 16.25H14.25C15.3546 16.25 16.25 15.3546 16.25 14.25V7.25C16.25 6.14543 15.3546 5.25 14.25 5.25Z"></path>
+              <path d="M2.80103 11.998L1.77203 5.07397C1.61003 3.98097 2.36403 2.96397 3.45603 2.80197L10.38 1.77297C11.313 1.63397 12.19 2.16297 12.528 3.00097"></path>
+            </svg>
+            <span class="stack">
+              <span aria-hidden="true">Copy markdown</span>
+              <span>Copy markdown</span>
+            </span>
+          </button>
+        </div>
+
+        <div class="prose"><slot /></div>
+
+        {(prev || next) && (
+          <nav class="pager">
+            {prev && (
+              <a href={prev.url}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="m15 6-6 6 6 6"></path>
+                </svg>
+                <span>{prev.title}</span>
+              </a>
+            )}
+            {next && (
+              <a class="next" href={next.url}>
+                <span>{next.title}</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="m9 6 6 6-6 6"></path>
+                </svg>
+              </a>
+            )}
+          </nav>
+        )}
+
+        <footer class="footer">
+          <div class="footer-top">
+            <div class="footer-brand">
+              <a class="brand" href="/">
+                <img class="brand-logo footer-logo" src="/logo.webp" alt="" width="76" height="30" />
+                <span>Seo Geo Docs</span>
+              </a>
+              <p>个人资料库：SEO / GEO / XEO / Prompts / Skills / Blog</p>
+            </div>
+
+            <div class="footer-col">
+              <p>Content</p>
+              {nav.map((s) => <a href={s.url}>{s.label}</a>)}
+            </div>
+          </div>
+
+          <div class="footer-bottom">
+            <span>© 2026 seo/geo docs</span>
+            <a href="https://github.com/">GitHub</a>
+          </div>
+        </footer>
+      </main>
+
+      {toc.length > 0 && (
+        <aside class="toc">
+          <button class="toc-toggle" id="toc-toggle" type="button" aria-expanded="true" aria-controls="toc-list">
+            <svg width="13" height="13" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <path d="M2.75 3.75h12.5"></path>
+              <path d="M2.75 9h5.5"></path>
+              <path d="M2.75 14.25h12.5"></path>
+            </svg>
+            <span>On this page</span>
+            <svg class="chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m6 9 6 6 6-6"></path>
+            </svg>
+          </button>
+          <div id="toc-list">
+            {toc.map((h) => (
+              <a href={`#${h.slug}`} class={`depth-${h.depth}`}>{h.text}</a>
+            ))}
+          </div>
+        </aside>
+      )}
+    </div>
+
+    <script type="application/json" id="page-md" set:html={markdown} />
+
+    <script>
+      const root = document.documentElement;
+      const setToc = (off) => {
+        root.classList.toggle('toc-off', off);
+        localStorage.setItem('toc', off ? 'off' : 'on');
+        document.getElementById('toc-toggle')?.setAttribute('aria-expanded', String(!off));
+      };
+      document.getElementById('toc-toggle')?.addEventListener('click', () => {
+        setToc(!root.classList.contains('toc-off'));
+      });
+      setToc(root.classList.contains('toc-off'));   // 刷新后同步 aria 状态
+
+      const copyBtn = document.getElementById('copy-md');
+      const raw = document.getElementById('page-md');
+      if (copyBtn && raw) {
+        const label = copyBtn.querySelector('.stack span:last-child');
+        copyBtn.addEventListener('click', async () => {
+          await navigator.clipboard.writeText(JSON.parse(raw.textContent));
+          label.textContent = 'Copied';
+          setTimeout(() => (label.textContent = 'Copy markdown'), 1500);
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,200 @@
+# 维护说明
+
+这份文档写给"以后在 GitHub 网页上改内容"的自己。**只想加文章，看第 2 节就够。**
+
+---
+
+## 1. 仓库结构：哪些能改，哪些别动
+
+```
+content/                ← 所有文章，平时只改这里
+  seo/  geo/  xeo/  method/  programmatic-seo/
+  google-algorithm/  prompts/  skills/  blog/  project/  about-me/
+src/
+  lib/nav.ts            ← 顶部菜单：栏目、显示名、分组顺序
+  layouts/              ← 页面骨架（顶栏、左栏、目录、页脚）
+  components/           ← 顶栏、左栏组件
+  styles/global.css     ← 所有样式和配色变量
+public/                 ← 图片、logo、字体
+```
+
+| 想做的事 | 改哪 |
+| --- | --- |
+| 加/改文章 | `content/栏目/*.md` |
+| 加/改栏目（顶部菜单） | `content/新栏目/index.md` + `src/lib/nav.ts` 加一行 |
+| 改左栏分组名或顺序 | `src/lib/nav.ts` 里那一栏的 `groups` |
+| 改配色、字号、宽度 | `src/styles/global.css` 顶部的变量 |
+| 改页脚、版权 | `src/layouts/Layout.astro` |
+
+**别动的**：`src/layouts/`、`src/components/`、`src/pages/` 里的逻辑代码（改了容易整站崩），以及**已发布页面的文件路径**（等于改了 URL，见第 6 节）。
+
+---
+
+## 2. 在 GitHub 网页上加一篇文章
+
+1. 打开仓库，进入目标栏目目录，例如 `content/seo/on-page/`
+2. 右上角 **Add file → Create new file**
+3. 文件名写 `english-slug.md`（**英文小写、连字符、不要空格和中文**）
+4. 粘贴下面的模板，改内容
+5. 页面底部 **Commit changes**（提交到 `main` 分支）
+6. 等 1-2 分钟，Actions 跑完自动上线
+
+```markdown
+---
+title: 页面标题
+description: 一句话说明，40-60 字，会进搜索结果摘要
+order: 5
+updated: 2026-09-15
+---
+
+> 摘要一行：这页解决什么问题。紧跟标题，会被搜索和 AI 直接摘走。
+
+正文第一段直接给结论，不要铺垫。
+
+## 小节标题（名词短语）
+
+段落控制在三句以内。关键结论用 **加粗** 标出来。
+
+## Next steps
+
+- [相关页面](/seo/on-page/xxx/): 点进去能得到什么
+```
+
+**改已有文章**：进入文件 → 点右上角铅笔图标 → 改 → Commit changes。
+
+### frontmatter 字段
+
+| 字段 | 必填 | 说明 |
+| --- | --- | --- |
+| `title` | ✅ | 页面标题，同时是左栏目录名 |
+| `description` | 建议 | 搜索结果摘要，40-60 字 |
+| `order` | 建议 | 左栏排序，小的在前，不写默认 99 |
+| `updated` | 建议 | 最后更新时间，格式 `2026-09-15` |
+
+**语法细节**：冒号后面要有空格；`title` 里如果出现冒号，整个值要用引号包起来（`title: "A: B"`）。frontmatter 写错会导致**整个站构建失败**，Actions 会报红，改回来就好。
+
+---
+
+## 3. 目录结构 = 导航结构
+
+```
+content/seo/index.md                     → 栏目首页，URL /seo/
+content/seo/basics/keyword-research.md   → 左栏分组「概览」下的页面
+                                            URL /seo/basics/keyword-research/
+content/index.md                         → 站点首页，URL /
+```
+
+- **子文件夹 = 左栏里的小标题**。建了文件夹就有分组，不用改代码
+- 分组标题默认取文件夹名（`on-page` → On Page），要中文或调顺序，改 `nav.ts` 里那一栏的 `groups`：
+
+```js
+{ id: 'seo', label: 'SEO', groups: [['basics', '概览'], ['on-page', '站内 SEO'], ['off-page', '站外 SEO']] },
+```
+
+- **没列到的文件夹自动排在后面**，用文件夹名当标题——所以"建个文件夹就成组"依然成立
+- **`order` 只在组内生效**，跨组顺序由 `groups` 决定
+
+### 加一个新栏目（第 12 个菜单）
+
+1. 建目录 `content/新栏目/index.md`，写 frontmatter（`title` 就是左栏顶部显示的栏目名）
+2. 在 `src/lib/nav.ts` 的 `sections` 里加一行：
+
+```js
+{ id: '新栏目', label: '顶部菜单显示名', groups: [['分组文件夹', '分组中文名']] },
+```
+
+`id` 必须和目录名完全一致。`groups` 可以省略（那就只有一层平铺）。
+
+---
+
+## 4. 写作规范
+
+内容格式规范单独一份：**[WRITING.md](WRITING.md)**。核心几条：
+
+- 标题下面紧跟一行 `>` 摘要，不复述标题
+- 段落 ≤3 句，句子 ≤25 词
+- 有后果的提醒写 `> 警告：`，省事的做法写 `> 提示：`
+- 每页结尾是链接清单（`## Next steps`），每条链接后面跟一句收益说明
+- 不写"总结"段
+
+---
+
+## 5. 图片
+
+放进 `public/` 目录（可以在 GitHub 网页上直接上传），正文里写：
+
+```markdown
+![图片说明](/demo.png)
+```
+
+**路径以 `/` 开头**（不是 `public/demo.png`）。文件名用英文小写。
+
+---
+
+## 6. 链接和 URL 规范
+
+- **站内链接一律写绝对路径**：`/seo/on-page/internal-links/`（结尾带斜杠）
+- **发布过的文件路径不要改**。改了就是改了 URL，外部链接和搜索收录全部失效。要改就得做 301 跳转，成本远大于收益
+- 改文章**标题**是安全的（只是显示名变了，URL 不变）
+- 想换 URL：新建文件写新内容，旧文件保留并置顶一条指向新页面的说明；或者留着不管
+
+---
+
+## 7. 部署是怎么跑的
+
+```
+网页上 Commit → GitHub Actions 自动构建 → 部署到 Pages
+```
+
+- 工作流文件：`.github/workflows/deploy.yml`
+- 看进度：仓库顶部 **Actions** 标签页。绿勾=成功，红叉=失败
+- 失败原因 90% 是 frontmatter 语法错（比如冒号后没空格、引号不配对），日志里会指出是哪个文件哪一行
+- 想手动重跑：Actions → 左侧「部署到 GitHub Pages」→ 右上角 **Run workflow**
+- 线上地址：`https://lllygkj33-creator.github.io/`
+
+---
+
+## 8. 改坏了怎么回滚
+
+**单个文件改错**：进入该文件 → 右上角 **History** → 找到改坏之前的那次提交 → 用当时的版本重新提交。
+
+**整次提交有问题**：
+
+1. 仓库首页 **Commits**（提交历史）
+2. 找到那次提交，右上角 **Revert**（GitHub 会新建一个反向提交）
+3. 提交后 Actions 自动重新部署，1-2 分钟回到之前的状态
+
+不用怕改坏：**每次提交都有完整历史，任何状态都能回到**。
+
+---
+
+## 9. 常见错误
+
+| 现象 | 原因 |
+| --- | --- |
+| Actions 红叉，构建失败 | frontmatter 语法错；看日志里指出的文件和行号 |
+| 新页面没出现在左栏 | `order` 值不合理，或文件放错了栏目目录 |
+| 链接点开 404 | 站内链接没写全，或缺结尾斜杠；`pnpm check` 会在部署时拦住 |
+| 图片不显示 | 图片没放 `public/`，或正文里写了 `public/` 前缀 |
+| 菜单多了一个栏目但点开空白 | `nav.ts` 里加了 `id`，但没建对应的 `content/栏目/index.md` |
+| 页面顺序不对 | 组内看 `order`，组间看 `nav.ts` 的 `groups` 数组顺序 |
+
+---
+
+## 10. 本地预览（可选）
+
+如果要在本地先看效果：
+
+```bash
+git clone git@github.com:lllygkj33-creator/lllygkj33-creator.github.io.git
+cd lllygkj33-creator.github.io
+pnpm install
+pnpm dev          # http://localhost:4321，改文件即时刷新
+```
+
+提交前自检：
+
+```bash
+pnpm build        # 构建
+pnpm check        # 校验所有导航和正文链接
+```
