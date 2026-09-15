@@ -283,8 +283,3 @@ CTR：
 
 > **摩天大楼真正要做的不是“比别人长”，而是让用户更快得到答案、看到更强的证据，并更容易做决定。**
 
-## Next steps
-
-- [诊断](/method/process/diagnose/)：先确认页面真正卡在哪里
-- [信息增益](/seo/on-page/information-gain/)：判断新增内容是否真的提供新价值
-- [衡量](/method/process/measure/)：判断重写后排名和点击是否改善
