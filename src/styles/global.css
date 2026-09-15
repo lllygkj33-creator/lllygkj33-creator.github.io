@@ -611,10 +611,16 @@ html.toc-off .main { max-width: 72rem; }
 .toc a.depth-3 { padding-left: 0.75rem; }
 
 /* ---------- 页脚 ---------- */
+/* 页脚：整页底部，横跨全宽 */
 .footer {
   margin-top: 5rem;
-  padding-top: 2rem;
   border-top: 1px solid var(--border);
+}
+
+.footer-in {
+  max-width: var(--shell);
+  margin: 0 auto;
+  padding: 2.5rem 2rem 3rem;
   display: flex;
   flex-direction: column;
   gap: 2.5rem;
@@ -662,10 +668,36 @@ html.toc-off .main { max-width: 72rem; }
 .footer-bottom {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
   gap: 1.5rem;
   font-size: 0.875rem;
   color: var(--dim);
 }
+
+.footer-links {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* 社交图标（页脚 + 正文右上角共用） */
+.social {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.social a,
+.social span {
+  display: flex;
+  color: var(--faint);
+}
+
+.social a:hover { color: var(--text); }
+.social svg { width: 1.125rem; height: 1.125rem; fill: currentColor; }
+.social-inline svg { width: 1rem; height: 1rem; }
+.social-inline { margin-left: 0.25rem; }
 
 .footer-bottom a:hover { color: var(--text); }
 
