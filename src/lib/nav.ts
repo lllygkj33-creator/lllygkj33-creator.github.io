@@ -8,6 +8,7 @@ export const sections = [
   { id: 'geo', label: 'GEO', groups: [['basics', '基础'], ['answers', '答案'], ['entities', '实体'], ['machine', '机器'], ['measurement', '测量'], ['platform', '平台']] },
   { id: 'method', label: '方法论', groups: [['basics', '概览']] },
   { id: 'google-algorithm', label: 'Google 算法', groups: [['overview', '概览'], ['quality', '质量'], ['semantics', '语义'], ['links', '链接'], ['signals', '信号']] },
+  { id: 'content-quality', label: '内容质量评估', groups: [['dimensions', '维度']] },
 ];
 
 /* 以后再加栏目：把对应那行移进上面的数组，并建好 content/<id>/index.md

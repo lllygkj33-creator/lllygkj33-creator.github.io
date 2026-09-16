@@ -734,3 +734,125 @@ html.toc-off .main { max-width: 72rem; }
 @media (max-width: 700px) {
   .copy-btn { display: none; }
 }
+
+
+/* ---------- 内容质量评估：分档卡 / 批注块 / 熔断标记 ---------- */
+/* 分档色沿用 seo_quality_analyzer 的配色：>=8.5 绿 / 7.0-8.5 橙 / <7.0 红 */
+.q-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+  gap: 0.75rem;
+  margin: 1.75rem 0;
+}
+
+.q-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--bg);
+}
+
+.q-card .q-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.q-card .q-score {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.q-card .q-note-line { font-size: 0.8125rem; color: var(--muted); }
+
+.q-high { color: #1e6b35; }
+.q-medium { color: #a85b00; }
+.q-low { color: #a83228; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .q-high { color: #5cc27e; }
+  :root:not([data-theme="light"]) .q-medium { color: #e0a35c; }
+  :root:not([data-theme="light"]) .q-low { color: #e07a70; }
+}
+
+:root[data-theme="dark"] .q-high { color: #5cc27e; }
+:root[data-theme="dark"] .q-medium { color: #e0a35c; }
+:root[data-theme="dark"] .q-low { color: #e07a70; }
+
+/* 批注卡：段落 + 气泡说明 */
+.q-note {
+  margin: 1.5rem 0;
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--faint);
+  border-radius: 0.875rem;
+  background: var(--code-bg);
+}
+
+.q-note[data-level="high"] { border-left-color: #a83228; }
+.q-note[data-level="medium"] { border-left-color: #a85b00; }
+.q-note[data-level="low"] { border-left-color: #1e6b35; }
+
+.q-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.q-head .q-no { color: var(--faint); font-variant-numeric: tabular-nums; }
+
+.q-head .q-tag {
+  padding: 0.1rem 0.45rem;
+  border-radius: 0.375rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--body);
+  letter-spacing: 0.03em;
+}
+
+.q-quote {
+  margin: 0 0 0.6rem;
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--border);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+
+.q-note dl { margin: 0; font-size: 0.9375rem; }
+.q-note dt { display: inline; font-weight: 600; color: var(--muted); }
+.q-note dd { display: inline; margin: 0 0 0 0.25rem; }
+.q-note dd::after { content: ""; display: block; margin-bottom: 0.3rem; }
+.q-note dl > div + div { margin-top: 0.35rem; }
+
+/* 熔断标记：来自 py 硬限制层的确定性规则 */
+.q-fuse {
+  margin: 1.5rem 0;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid rgba(168, 50, 40, 0.35);
+  border-radius: 0.875rem;
+  background: rgba(168, 50, 40, 0.06);
+  font-size: 0.9375rem;
+}
+
+.q-fuse strong { color: #a83228; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .q-fuse { background: rgba(224, 122, 112, 0.08); border-color: rgba(224, 122, 112, 0.35); }
+  :root:not([data-theme="light"]) .q-fuse strong { color: #e07a70; }
+}
+
+:root[data-theme="dark"] .q-fuse { background: rgba(224, 122, 112, 0.08); border-color: rgba(224, 122, 112, 0.35); }
+:root[data-theme="dark"] .q-fuse strong { color: #e07a70; }
