@@ -5,6 +5,9 @@ export default defineConfig({
   site: 'https://lllygkj33-creator.github.io',
   // 目录重构前的旧地址，全部转到新地址（部署在 Pages 上是 meta refresh 形式的跳转）
   redirects: {
+    '/link-graph/data-model/': '/link-graph/spec/data-model/',
+    '/link-graph/diagnostics/': '/link-graph/spec/diagnostics/',
+    '/link-graph/configuration/': '/link-graph/spec/configuration/',
     '/content-quality/example-001/': '/content-quality/examples/001-media-server-hardware/',
     '/content-quality/example-002/': '/content-quality/examples/002-capcut-ai-avatar-ads/',
     '/method/basics/skyscraper-content-opt/': '/skyscraper/',

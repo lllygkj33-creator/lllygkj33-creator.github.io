@@ -518,6 +518,12 @@ a { color: inherit; text-decoration: none; }
   margin: 1.5rem 0;
   border-collapse: collapse;
   font-size: 0.9375rem;
+  overflow-wrap: anywhere;      /* 长路径不撑破表格 */
+}
+
+/* 列多的表格在小屏上整体横向滚动（markdown 表格无法用 div 包裹，只能作用在 table 上） */
+@media (max-width: 900px) {
+  .prose table { display: block; overflow-x: auto; white-space: nowrap; }
 }
 
 .prose th, .prose td {
@@ -1154,3 +1160,30 @@ html.toc-off .main { max-width: 72rem; }
 .lg-table th { color: var(--faint); font-weight: 600; }
 .lg-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
 .lg-table code { font-size: 0.8125rem; }
+
+
+/* ---------- 链接图谱：簇边界 / 幽灵节点 / 邻接矩阵 ---------- */
+.lg-hull { fill: color-mix(in srgb, var(--muted) 5%, transparent); stroke: var(--border); stroke-width: 1; }
+.lg-hull-orphan { fill: none; stroke: var(--lg-orphan); stroke-width: 1.2; stroke-dasharray: 5 4; }
+.lg-hull-label { font-size: 11px; font-weight: 600; fill: var(--faint); font-family: var(--sans); letter-spacing: 0.04em; }
+.lg-hull-label-orphan { fill: var(--lg-orphan); }
+.lg-ghost circle { fill: none; stroke-width: 1.4; stroke-dasharray: 3 3; }
+.lg-ghost text { font-size: 10px; fill: var(--faint); font-family: var(--mono); }
+.lg-ghost-broken circle { stroke: var(--lg-orphan); }
+.lg-ghost-broken text { fill: var(--lg-orphan); }
+.lg-ghost-redirect circle { stroke: var(--lg-dead); }
+.lg-ghost-redirect text { fill: var(--lg-dead); }
+.lg-edge-cross { stroke-width: 1.8; stroke-dasharray: none; stroke: color-mix(in srgb, var(--lg-hub) 55%, transparent); }
+.lg-center-note { font-size: 10px; fill: var(--lg-orphan); font-family: var(--sans); }
+
+.lg-matrix { width: 100%; border-collapse: collapse; font-size: 0.75rem; margin: 1.5rem 0; }
+.lg-matrix th, .lg-matrix td { border: 1px solid var(--border); padding: 0.15rem 0.3rem; text-align: center; }
+.lg-matrix thead th { color: var(--faint); font-weight: 600; }
+.lg-matrix thead th span { writing-mode: vertical-rl; text-orientation: mixed; display: inline-block; padding: 0.15rem 0; }
+.lg-matrix tbody th { text-align: left; white-space: nowrap; color: var(--body); font-weight: 500; padding-right: 0.5rem; }
+.lg-matrix td.self { background: var(--code-bg); }
+.lg-matrix td.link { color: var(--lg-hub); font-weight: 700; }
+.lg-matrix td.dup { color: var(--lg-weak); font-weight: 700; }
+.lg-matrix td.broken { color: var(--lg-orphan); font-weight: 700; }
+.lg-matrix td.redirect { color: var(--lg-dead); font-weight: 700; }
+.lg-matrix-wrap { overflow-x: auto; }
