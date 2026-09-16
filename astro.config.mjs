@@ -5,6 +5,8 @@ export default defineConfig({
   site: 'https://lllygkj33-creator.github.io',
   // 目录重构前的旧地址，全部转到新地址（部署在 Pages 上是 meta refresh 形式的跳转）
   redirects: {
+    '/content-quality/example-001/': '/content-quality/examples/001-media-server-hardware/',
+    '/content-quality/example-002/': '/content-quality/examples/002-capcut-ai-avatar-ads/',
     '/method/basics/skyscraper-content-opt/': '/skyscraper/',
     '/seo/content/skyscraper/': '/skyscraper/',
     '/geo/on-page/ai-citation-tracking-guide/': '/geo/measurement/ai-citation-tracking-guide/',
