@@ -153,7 +153,8 @@ content/index.md                         → 站点首页，URL /
 
 - 工作流文件：`.github/workflows/deploy.yml`
 - 看进度：仓库顶部 **Actions** 标签页。绿勾=成功，红叉=失败
-- 失败原因 90% 是 frontmatter 语法错（比如冒号后没空格、引号不配对），日志里会指出是哪个文件哪一行
+- 部署前会先跑**文章体检**（`pnpm lint`）：frontmatter 缺失、空文件、order 不是数字，都会在这里被拦住，并**直接列出是哪个文件、什么问题**
+- 体检过了才构建，构建过了才部署
 - 想手动重跑：Actions → 左侧「部署到 GitHub Pages」→ 右上角 **Run workflow**
 - 线上地址：`https://lllygkj33-creator.github.io/`
 
@@ -177,7 +178,8 @@ content/index.md                         → 站点首页，URL /
 
 | 现象 | 原因 |
 | --- | --- |
-| Actions 红叉，构建失败 | frontmatter 语法错；看日志里指出的文件和行号 |
+| Actions 红叉，构建失败 | 先看日志里「检查文章格式」那一步，它会列出有问题的文件；常见是空文件、缺 title、order 写成文字 |
+| 推送了但线上没更新 | Actions 里那一步红叉了，看它的日志 |
 | 新页面没出现在左栏 | `order` 值不合理，或文件放错了栏目目录 |
 | 左栏或顶栏链接 404 | 栏目名和 `nav.ts` 的 `id` 对不上，或页面文件缺失；`pnpm check` 会在部署时拦住 |
 | 正文里的页面名点不动 | 正常——正文不写站内链接，去左栏找同名页面 |

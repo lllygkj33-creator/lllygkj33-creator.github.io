@@ -6,7 +6,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "check": "node test/links.mjs"
+    "check": "node test/links.mjs",
+    "lint": "node test/frontmatter.mjs"
   },
   "dependencies": {
     "astro": "^7.3.2"
