@@ -604,11 +604,27 @@ html.toc-off .main { max-width: 72rem; }
 }
 
 .toc a:hover { color: var(--text); }
+
+/* 当前正在读的小节：变色 + 左侧细指示条 */
 .toc a.active {
   color: var(--active-text);
   text-shadow: -0.15px 0 0 currentColor, 0.15px 0 0 currentColor;
 }
+
+.toc a.active::before {
+  content: "";
+  position: absolute;
+  left: -0.75rem;
+  top: 0.35rem;
+  bottom: 0.35rem;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--active-text);
+}
+
+.toc a { position: relative; }
 .toc a.depth-3 { padding-left: 0.75rem; }
+.toc a.depth-3.active::before { left: 0; }
 
 /* ---------- 页脚 ---------- */
 /* 页脚：整页底部，横跨全宽 */
