@@ -43,7 +43,7 @@ updated: "2026-09-16"
     <span class="q-note-line">橙档</span>
   </div>
   <div class="q-card">
-    <span class="q-label">Information Gain</span>
+    <span class="q-label">信息增益</span>
     <span class="q-score q-low">6.0</span>
     <span class="q-note-line">无任何数据与来源</span>
   </div>

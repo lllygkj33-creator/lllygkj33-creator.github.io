@@ -30,7 +30,7 @@ updated: "2026-09-16"
     <span class="q-note-line">7.0–8.5 为橙档</span>
   </div>
   <div class="q-card">
-    <span class="q-label">Information Gain</span>
+    <span class="q-label">信息增益</span>
     <span class="q-score q-low">69</span>
     <span class="q-note-line">触发外链熔断</span>
   </div>
