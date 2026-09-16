@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 // 顶部横向菜单：顺序就是这里的顺序
 // groups 决定左栏分组的显示名和顺序；没列到的文件夹自动排在后面（用文件夹名当标题）
 export const sections = [
-  { id: 'seo', label: 'SEO', groups: [['basics', '概览'], ['on-page', '站内 SEO'], ['off-page', '站外 SEO']] },
+  { id: 'seo', label: 'SEO', groups: [['basics', '概览'], ['on-page', '站内 SEO'], ['tech', '技术 SEO'], ['off-page', '站外 SEO']] },
   { id: 'geo', label: 'GEO', groups: [['basics', '概览'], ['on-page', '站内'], ['platforms', '平台']] },
   { id: 'method', label: '方法论', groups: [['basics', '概览'], ['process', '流程'], ['assets', '资产']] },
   { id: 'google-algorithm', label: 'Google 算法', groups: [['basics', '概览'], ['systems', '系统'], ['respond', '应对']] },
