@@ -1071,3 +1071,86 @@ html.toc-off .main { max-width: 72rem; }
 .sk-prio[data-p="p1"] { background: color-mix(in srgb, var(--sk-warn) 14%, transparent); color: var(--sk-warn); }
 .sk-prio[data-p="p2"] { background: color-mix(in srgb, var(--sk-a) 14%, transparent); color: var(--sk-a); }
 .sk-prio[data-p="p3"] { background: var(--code-bg); color: var(--muted); }
+
+
+/* ---------- 链接图谱：节点-连线图与诊断表 ---------- */
+:root {
+  --lg-healthy: #1e6b35;
+  --lg-weak: #a85b00;
+  --lg-orphan: #a83228;
+  --lg-dead: #7c3aed;
+  --lg-hub: #2563eb;
+  --lg-edge: rgba(112, 112, 112, 0.45);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --lg-healthy: #5cc27e;
+    --lg-weak: #e0a35c;
+    --lg-orphan: #e07a70;
+    --lg-dead: #c4a6ff;
+    --lg-hub: #93b4ff;
+    --lg-edge: rgba(158, 158, 158, 0.4);
+  }
+}
+
+:root[data-theme="dark"] {
+  --lg-healthy: #5cc27e;
+  --lg-weak: #e0a35c;
+  --lg-orphan: #e07a70;
+  --lg-dead: #c4a6ff;
+  --lg-hub: #93b4ff;
+  --lg-edge: rgba(158, 158, 158, 0.4);
+}
+
+.lg-panel {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--bg);
+}
+
+.lg-graph { width: 100%; height: auto; display: block; }
+
+.lg-edge { stroke: var(--lg-edge); stroke-width: 1.1; }
+.lg-edge-dup { stroke-dasharray: 4 3; stroke-width: 1.5; }
+.lg-edge-broken { stroke: var(--lg-orphan); stroke-width: 1.6; stroke-dasharray: 5 4; }
+.lg-edge-redirect { stroke: var(--lg-dead); stroke-width: 1.6; }
+.lg-arrowhead { fill: var(--lg-edge); }
+.lg-arrowhead-broken { fill: var(--lg-orphan); }
+.lg-arrowhead-redirect { fill: var(--lg-dead); }
+.lg-broken-label, .lg-redirect-label { font-size: 10px; font-family: var(--mono); }
+.lg-broken-label { fill: var(--lg-orphan); }
+.lg-redirect-label { fill: var(--lg-dead); }
+
+.lg-node circle { stroke-width: 2; fill: var(--bg); }
+.lg-node text { font-size: 10px; font-family: var(--sans); fill: var(--muted); }
+.lg-healthy circle { stroke: var(--lg-healthy); }
+.lg-weak circle { stroke: var(--lg-weak); }
+.lg-orphan circle { stroke: var(--lg-orphan); }
+.lg-dead circle { stroke: var(--lg-dead); }
+.lg-hub circle { stroke: var(--lg-hub); stroke-width: 3; }
+.lg-node[data-dim="1"] { opacity: 0.18; }
+
+.lg-legend { display: flex; flex-wrap: wrap; gap: 0.5rem 1.1rem; margin-top: 0.75rem; font-size: 0.8125rem; color: var(--body); }
+.lg-legend span { display: inline-flex; align-items: center; gap: 0.4rem; }
+.lg-legend i { width: 0.6rem; height: 0.6rem; border-radius: 999px; display: inline-block; }
+.lg-legend .i-healthy { background: var(--lg-healthy); }
+.lg-legend .i-weak { background: var(--lg-weak); }
+.lg-legend .i-orphan { background: var(--lg-orphan); }
+.lg-legend .i-dead { background: var(--lg-dead); }
+.lg-legend .i-hub { background: var(--lg-hub); }
+
+.lg-pill { display: inline-block; padding: 0.05rem 0.4rem; border-radius: 0.375rem; font-size: 0.75rem; font-weight: 600; }
+.lg-pill[data-st="健康"] { color: var(--lg-healthy); background: color-mix(in srgb, var(--lg-healthy) 12%, transparent); }
+.lg-pill[data-st="弱连接"] { color: var(--lg-weak); background: color-mix(in srgb, var(--lg-weak) 12%, transparent); }
+.lg-pill[data-st="孤岛"] { color: var(--lg-orphan); background: color-mix(in srgb, var(--lg-orphan) 12%, transparent); }
+.lg-pill[data-st="死胡同"] { color: var(--lg-dead); background: color-mix(in srgb, var(--lg-dead) 12%, transparent); }
+.lg-pill[data-st="Hub"] { color: var(--lg-hub); background: color-mix(in srgb, var(--lg-hub) 12%, transparent); }
+
+.lg-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; min-width: 34rem; }
+.lg-table th, .lg-table td { padding: 0.5rem 0.7rem; border-bottom: 1px solid var(--border); text-align: left; }
+.lg-table th { color: var(--faint); font-weight: 600; }
+.lg-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.lg-table code { font-size: 0.8125rem; }
