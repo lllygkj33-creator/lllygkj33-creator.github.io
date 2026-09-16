@@ -1,7 +1,7 @@
 ---
-title: "转化漏斗与页面金字塔模型"
+title: "转化漏斗"
 description: "用 Awareness、Consideration、Conversion 和 Retention 四层漏斗理解用户从搜索到购买的路径，并把不同搜索意图映射到 Blog、Collection、Product 和 Page。"
-order: 14
+order: 3
 updated: "2026-09-15"
 ---
 

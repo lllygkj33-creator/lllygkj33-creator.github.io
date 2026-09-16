@@ -3,10 +3,11 @@ import { getCollection } from 'astro:content';
 // 顶部横向菜单：顺序就是这里的顺序
 // groups 决定左栏分组的显示名和顺序；没列到的文件夹自动排在后面（用文件夹名当标题）
 export const sections = [
-  { id: 'seo', label: 'SEO', groups: [['basics', '概览'], ['on-page', '站内 SEO'], ['tech', '技术 SEO'], ['off-page', '站外 SEO']] },
-  { id: 'geo', label: 'GEO', groups: [['basics', '概览'], ['on-page', '站内'], ['platforms', '平台']] },
-  { id: 'method', label: '方法论', groups: [['basics', '概览'], ['process', '流程'], ['assets', '资产']] },
-  { id: 'google-algorithm', label: 'Google 算法', groups: [['basics', '概览'], ['systems', '系统'], ['respond', '应对']] },
+  // groups 决定左栏分组的显示名和顺序；没列到的文件夹自动排在后面（用文件夹名当标题）
+  { id: 'seo', label: 'SEO', groups: [['basics', '基础'], ['content', '内容'], ['on-page', '页面'], ['technical', '技术'], ['links', '链接'], ['analytics', '分析']] },
+  { id: 'geo', label: 'GEO', groups: [['basics', '基础'], ['answers', '答案'], ['entities', '实体'], ['machine', '机器'], ['measurement', '测量']] },
+  { id: 'method', label: '方法论', groups: [['basics', '概览']] },
+  { id: 'google-algorithm', label: 'Google 算法', groups: [['overview', '概览'], ['quality', '质量'], ['semantics', '语义'], ['links', '链接'], ['signals', '信号']] },
 ];
 
 /* 以后再加栏目：把对应那行移进上面的数组，并建好 content/<id>/index.md

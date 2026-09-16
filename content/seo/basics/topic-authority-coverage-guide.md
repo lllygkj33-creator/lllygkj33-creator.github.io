@@ -1,7 +1,7 @@
 ---
-title: "Topic Authority 与主题覆盖"
+title: "Topic Authority"
 description: "Topic Authority 的核心不是围绕一个关键词写很多文章，而是让网站在一个明确主题里持续建立完整、互相关联、可验证的知识体系。"
-order: 24
+order: 5
 updated: "2026-09-16"
 ---
 

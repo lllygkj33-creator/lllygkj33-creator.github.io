@@ -1,7 +1,7 @@
 ---
-title: "TDAU 规范：Title、Description、Alt 与 URL"
+title: "TDAU"
 description: "用一套统一规则规范 Meta Title、Meta Description、图片 Alt 和 URL Slug，让页面在搜索结果、图片理解和站点结构上保持清楚、稳定、可维护。"
-order: 8
+order: 2
 updated: "2026-09-15"
 ---
 
