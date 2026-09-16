@@ -5,7 +5,7 @@ import { getCollection } from 'astro:content';
 export const sections = [
   // groups 决定左栏分组的显示名和顺序；没列到的文件夹自动排在后面（用文件夹名当标题）
   { id: 'seo', label: 'SEO', groups: [['basics', '基础'], ['content', '内容'], ['on-page', '页面'], ['technical', '技术'], ['links', '链接'], ['analytics', '分析']] },
-  { id: 'geo', label: 'GEO', groups: [['basics', '基础'], ['answers', '答案'], ['entities', '实体'], ['machine', '机器'], ['measurement', '测量']],['platform', '平台']] },
+  { id: 'geo', label: 'GEO', groups: [['basics', '基础'], ['answers', '答案'], ['entities', '实体'], ['machine', '机器'], ['measurement', '测量'], ['platform', '平台']] },
   { id: 'method', label: '方法论', groups: [['basics', '概览']] },
   { id: 'google-algorithm', label: 'Google 算法', groups: [['overview', '概览'], ['quality', '质量'], ['semantics', '语义'], ['links', '链接'], ['signals', '信号']] },
 ];
