@@ -1,9 +1,9 @@
 ---
-// 右上角黑胶播放器：默认静止；点击后摇杆落下、黑胶与中心图片同步旋转并播放单曲
-// 左侧歌词按 LRC 时间轴一行一行跟进，当前行高亮
+// 右上角黑胶播放器：经典黑胶样式（黑盘面 + 红标签），默认静止
+// 点击后摇杆落下、唱片旋转并播放单曲；左侧歌词按 LRC 时间轴一行一行跟进，当前行高亮
 ---
 
-<div class="vinyl-wrap">
+<div class="vinyl-root" id="vinyl-root" transition:persist>
   <div class="vinyl-lyrics" id="vinyl-lyrics" hidden>
     <span class="vinyl-line now" id="vinyl-line-now"></span>
     <span class="vinyl-line next" id="vinyl-line-next"></span>
@@ -11,20 +11,25 @@
 
   <div class="vinyl" id="vinyl" role="button" tabindex="0" aria-label="播放或暂停黑胶单曲" aria-pressed="false">
     <div class="vinyl-disc">
-      <img class="vinyl-cover" src="/images/vinyl-cover.jpg" alt="" width="500" height="500" />
+      <span class="vinyl-label" aria-hidden="true"></span>
       <span class="vinyl-hole" aria-hidden="true"></span>
     </div>
     <span class="vinyl-arm" aria-hidden="true"></span>
   </div>
+
+  <audio id="vinyl-audio" src="/audio/song.mp3" preload="metadata" loop></audio>
 </div>
 
-<audio id="vinyl-audio" src="/audio/song.mp3" preload="metadata" loop></audio>
-
 <script>
-  const vinyl = document.getElementById('vinyl');
-  const audio = document.getElementById('vinyl-audio');
+  // 用 astro:page-load 而不是直接执行：配合 transition:persist，
+  // 播放器节点跨页面保留，因此只在首次绑定时初始化一次，音乐不会因换页中断
+  const initVinyl = () => {
+    const wrap = document.getElementById('vinyl-root');
+    const vinyl = document.getElementById('vinyl');
+    const audio = document.getElementById('vinyl-audio');
+    if (!wrap || !vinyl || !audio || wrap.dataset.bound === '1') return;
+    wrap.dataset.bound = '1';
 
-  if (vinyl && audio) {
     /* ── 歌词：读取 LRC，按当前播放时间切换行 ── */
     const box = document.getElementById('vinyl-lyrics');
     const nowEl = document.getElementById('vinyl-line-now');
@@ -97,5 +102,7 @@
         toggle();
       }
     });
-  }
+  };
+
+  document.addEventListener('astro:page-load', initVinyl);
 </script>

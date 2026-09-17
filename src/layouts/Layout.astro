@@ -1,4 +1,5 @@
 ---
+import { ClientRouter } from 'astro:transitions';
 import Topbar from '../components/Topbar.astro';
 import Sidebar from '../components/Sidebar.astro';
 import Social from '../components/Social.astro';
@@ -140,65 +141,75 @@ const markdown = JSON.stringify(`# ${title}\n\n${body}`).replace(/</g, '\\u003c'
     <script type="application/json" id="page-md" set:html={markdown} />
 
     <script>
-      const root = document.documentElement;
-      const setToc = (off) => {
-        root.classList.toggle('toc-off', off);
-        localStorage.setItem('toc', off ? 'off' : 'on');
-        document.getElementById('toc-toggle')?.setAttribute('aria-expanded', String(!off));
-      };
-      document.getElementById('toc-toggle')?.addEventListener('click', () => {
-        setToc(!root.classList.contains('toc-off'));
-      });
-      setToc(root.classList.contains('toc-off'));   // 刷新后同步 aria 状态
-
-      const copyBtn = document.getElementById('copy-md');
-      const raw = document.getElementById('page-md');
-      if (copyBtn && raw) {
-        const label = copyBtn.querySelector('.stack span:last-child');
-        copyBtn.addEventListener('click', async () => {
-          await navigator.clipboard.writeText(JSON.parse(raw.textContent));
-          label.textContent = 'Copied';
-          setTimeout(() => (label.textContent = 'Copy markdown'), 1500);
-        });
-      }
-
-      // 左栏：跳转后把自己滚到当前页那一条，不要停在最上面
-      const side = document.querySelector('.sidebar');
-      const activeLink = side?.querySelector('a.active');
-      if (side && activeLink) {
-        const s = side.getBoundingClientRect();
-        const a = activeLink.getBoundingClientRect();
-        side.scrollTop += a.top - s.top - side.clientHeight / 2 + a.height / 2;
-      }
-
-      // 右栏：正文滚到哪个 H2，目录里那一条就变色
-      const links = [...document.querySelectorAll('.toc a')];
-      // 锚点里可能是百分号编码（中文标题），解不开就按原样比对
-      const slugOf = (a) => {
+      // 站点启用了客户端路由（ClientRouter）：换页不重载整页，
+      // 所以所有依赖 DOM 的逻辑必须放在 astro:page-load 里重新初始化。
+      const tocSlug = (a) => {
         try {
           return decodeURIComponent(a.hash.slice(1));
         } catch {
           return a.hash.slice(1);
         }
       };
-      const heads = links.map((a) => document.getElementById(slugOf(a))).filter(Boolean);
-      if (heads.length) {
-        const mark = () => {
-          const line = window.scrollY + 140;   // 判读线：顶栏（112px）下面一点
-          const atEnd = window.innerHeight + window.scrollY >= document.body.scrollHeight - 4;
-          let current = heads[0];
-          for (const h of heads) {
-            if (h.getBoundingClientRect().top + window.scrollY <= line) current = h;
-          }
-          if (atEnd) current = heads[heads.length - 1];
-          for (const a of links) {
-            a.classList.toggle('active', slugOf(a) === current.id);
-          }
+
+      // 右栏目录高亮：随时读取当前 DOM，这样跨页面导航后依然有效
+      const markToc = () => {
+        const links = [...document.querySelectorAll('.toc a')];
+        if (!links.length) return;
+        const heads = links.map((a) => document.getElementById(tocSlug(a))).filter(Boolean);
+        if (!heads.length) return;
+
+        const line = window.scrollY + 140;            // 判读线：顶栏（112px）下面一点
+        const atEnd = window.innerHeight + window.scrollY >= document.body.scrollHeight - 4;
+        let current = heads[0];
+        for (const h of heads) {
+          if (h.getBoundingClientRect().top + window.scrollY <= line) current = h;
+        }
+        if (atEnd) current = heads[heads.length - 1];
+        for (const a of links) a.classList.toggle('active', tocSlug(a) === current.id);
+      };
+
+      addEventListener('scroll', markToc, { passive: true });
+      addEventListener('resize', markToc, { passive: true });
+
+      const initPage = () => {
+        const root = document.documentElement;
+
+        // 右栏目录开关（收起后整列隐藏，正文铺满）
+        const setToc = (off) => {
+          root.classList.toggle('toc-off', off);
+          localStorage.setItem('toc', off ? 'off' : 'on');
+          document.getElementById('toc-toggle')?.setAttribute('aria-expanded', String(!off));
         };
-        addEventListener('scroll', mark, { passive: true });
-        addEventListener('resize', mark, { passive: true });
-        mark();
-      }
+        document.getElementById('toc-toggle')?.addEventListener('click', () => {
+          setToc(!root.classList.contains('toc-off'));
+        });
+        setToc(root.classList.contains('toc-off'));
+
+        // 复制当前页 markdown
+        const copyBtn = document.getElementById('copy-md');
+        const raw = document.getElementById('page-md');
+        if (copyBtn && raw) {
+          const label = copyBtn.querySelector('.stack span:last-child');
+          copyBtn.addEventListener('click', async () => {
+            await navigator.clipboard.writeText(JSON.parse(raw.textContent));
+            label.textContent = 'Copied';
+            setTimeout(() => (label.textContent = 'Copy markdown'), 1500);
+          });
+        }
+
+        // 左栏：把当前页那一条滚到可视区中间
+        const side = document.querySelector('.sidebar');
+        const activeLink = side?.querySelector('a.active');
+        if (side && activeLink) {
+          const s = side.getBoundingClientRect();
+          const a = activeLink.getBoundingClientRect();
+          side.scrollTop += a.top - s.top - side.clientHeight / 2 + a.height / 2;
+        }
+
+        markToc();
+      };
+
+      document.addEventListener('astro:page-load', initPage);
     </script>
   </body>
 </html>

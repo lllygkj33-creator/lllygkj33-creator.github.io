@@ -62,53 +62,65 @@ const { nav, activeSection } = Astro.props;
 </header>
 
 <script>
-  const input = document.getElementById('nav-search');
-  if (input) {
-    input.addEventListener('input', () => {
-      const q = input.value.trim().toLowerCase();
-      document.querySelectorAll('.side-group').forEach((g) => {
-        let hit = 0;
-        g.querySelectorAll('a').forEach((a) => {
-          const show = !q || a.textContent.toLowerCase().includes(q);
-          a.hidden = !show;
-          if (show) hit++;
-        });
-        g.hidden = q ? hit === 0 : false;
-      });
-    });
-    addEventListener('keydown', (e) => {
-      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        input.focus();
-      }
-    });
-  }
+  // 跨页面导航（ClientRouter）后顶栏会重建，所以这里每次导航都重新绑定；
+  // 只挂在 window/document 上的监听必须写在顶层，避免每次导航重复叠加。
+  const closeTheme = () => {
+    const btn = document.getElementById('theme-btn');
+    const menu = document.getElementById('theme-menu');
+    if (!btn || !menu) return;
+    menu.hidden = true;
+    btn.setAttribute('aria-expanded', 'false');
+  };
 
-  // 深浅色切换：小电脑按钮 -> 太阳 / 月亮
-  const themeBtn = document.getElementById('theme-btn');
-  const themeMenu = document.getElementById('theme-menu');
-  if (themeBtn && themeMenu) {
-    const close = () => {
-      themeMenu.hidden = true;
-      themeBtn.setAttribute('aria-expanded', 'false');
-    };
-    themeBtn.addEventListener('click', () => {
-      const open = themeMenu.hidden;
-      themeMenu.hidden = !open;
-      themeBtn.setAttribute('aria-expanded', String(open));
-    });
-    themeMenu.addEventListener('click', (e) => {
-      const item = e.target.closest('[data-theme-value]');
-      if (!item) return;
-      document.documentElement.dataset.theme = item.dataset.themeValue;
-      localStorage.setItem('theme', item.dataset.themeValue);
-      close();
-    });
-    addEventListener('click', (e) => {
-      if (!e.target.closest('.theme')) close();
-    });
-    addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') close();
-    });
-  }
+  addEventListener('click', (e) => {
+    if (!e.target.closest('.theme')) closeTheme();
+  });
+  addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeTheme();
+  });
+
+  const initTopbar = () => {
+    // 搜索框：按当前左栏条目标题过滤
+    const input = document.getElementById('nav-search');
+    if (input) {
+      input.addEventListener('input', () => {
+        const q = input.value.trim().toLowerCase();
+        document.querySelectorAll('.side-group').forEach((g) => {
+          let hit = 0;
+          g.querySelectorAll('a').forEach((a) => {
+            const show = !q || a.textContent.toLowerCase().includes(q);
+            a.hidden = !show;
+            if (show) hit++;
+          });
+          g.hidden = q ? hit === 0 : false;
+        });
+      });
+      addEventListener('keydown', (e) => {
+        if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+          e.preventDefault();
+          input.focus();
+        }
+      });
+    }
+
+    // 深浅色切换
+    const themeBtn = document.getElementById('theme-btn');
+    const themeMenu = document.getElementById('theme-menu');
+    if (themeBtn && themeMenu) {
+      themeBtn.addEventListener('click', () => {
+        const open = themeMenu.hidden;
+        themeMenu.hidden = !open;
+        themeBtn.setAttribute('aria-expanded', String(open));
+      });
+      themeMenu.addEventListener('click', (e) => {
+        const item = e.target.closest('[data-theme-value]');
+        if (!item) return;
+        document.documentElement.dataset.theme = item.dataset.themeValue;
+        localStorage.setItem('theme', item.dataset.themeValue);
+        closeTheme();
+      });
+    }
+  };
+
+  document.addEventListener('astro:page-load', initTopbar);
 </script>

@@ -1198,7 +1198,7 @@ html.toc-off .main { max-width: 72rem; }
 
 :root[data-theme="dark"] { --lyric-now: #e8a085; --lyric-next: rgba(158, 158, 158, 0.7); }
 
-.vinyl-wrap {
+.vinyl-root {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -1259,23 +1259,23 @@ html.toc-off .main { max-width: 72rem; }
   /* 黑胶质感：底面 + 同心纹理 + 高光 */
   background:
     repeating-radial-gradient(circle at 50% 50%,
-      rgba(255, 255, 255, 0.05) 0 1px,
-      transparent 1px 3px),
+      rgba(255, 255, 255, 0.07) 0 1px,
+      transparent 1px 2.5px),
     radial-gradient(circle at 50% 50%, #2a2a2c 0 34%, #141416 34% 100%);
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 2px 8px rgba(0, 0, 0, 0.28);
   animation: vinyl-spin 6s linear infinite;
   animation-play-state: paused;      /* 默认静止 */
 }
 
-/* 中心自定义图片：唱片内部，随唱片一起转 */
-.vinyl-cover {
+/* 中心红标签：经典黑胶样式，随唱片一起转 */
+.vinyl-label {
   position: absolute;
-  inset: 26%;
-  width: 48%;
-  height: 48%;
+  inset: 27%;
   border-radius: 50%;
-  object-fit: cover;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14);
+  background: radial-gradient(circle at 50% 38%, #ff6a5a 0%, #e02b20 55%, #b3160d 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.35),
+    inset 0 2px 6px rgba(255, 255, 255, 0.18);
 }
 
 /* 中心孔 */
@@ -1283,12 +1283,12 @@ html.toc-off .main { max-width: 72rem; }
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 4px;
-  height: 4px;
-  margin: -2px 0 0 -2px;
+  width: 3px;
+  height: 3px;
+  margin: -1.5px 0 0 -1.5px;
   border-radius: 50%;
-  background: var(--bg);
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4);
+  background: #0b0b0c;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25);
 }
 
 /* 摇杆：默认停在外侧，播放时落到唱片上 */
