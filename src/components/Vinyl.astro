@@ -1,0 +1,44 @@
+---
+// 右上角黑胶播放器：默认静止，点击后摇杆落下 + 黑胶与中心图片同步旋转 + 播放单曲
+---
+
+<div class="vinyl" id="vinyl" role="button" tabindex="0" aria-label="播放或暂停黑胶单曲" aria-pressed="false">
+  <div class="vinyl-disc">
+    <img class="vinyl-cover" src="/images/vinyl-cover.jpg" alt="" width="500" height="500" />
+    <span class="vinyl-hole" aria-hidden="true"></span>
+  </div>
+  <span class="vinyl-arm" aria-hidden="true"></span>
+</div>
+
+<audio id="vinyl-audio" src="/audio/song.mp3" preload="metadata" loop></audio>
+
+<script>
+  const vinyl = document.getElementById('vinyl');
+  const audio = document.getElementById('vinyl-audio');
+
+  if (vinyl && audio) {
+    const toggle = async () => {
+      if (audio.paused) {
+        try {
+          await audio.play();
+        } catch {
+          return; // 浏览器拦截自动播放时不改状态
+        }
+        vinyl.classList.add('is-playing');
+        vinyl.setAttribute('aria-pressed', 'true');
+      } else {
+        audio.pause();
+        vinyl.classList.remove('is-playing');
+        vinyl.setAttribute('aria-pressed', 'false');
+      }
+    };
+
+    vinyl.addEventListener('click', toggle);
+    vinyl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggle();
+      }
+    });
+  }
+</script>

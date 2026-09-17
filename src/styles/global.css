@@ -1187,3 +1187,97 @@ html.toc-off .main { max-width: 72rem; }
 .lg-matrix td.broken { color: var(--lg-orphan); font-weight: 700; }
 .lg-matrix td.redirect { color: var(--lg-dead); font-weight: 700; }
 .lg-matrix-wrap { overflow-x: auto; }
+
+
+/* ---------- 顶栏右上的黑胶播放器 ---------- */
+.vinyl {
+  position: relative;
+  flex: none;
+  width: 2.6rem;
+  height: 2.6rem;
+  cursor: pointer;
+  outline-offset: 3px;
+}
+
+.vinyl-disc {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  /* 黑胶质感：底面 + 同心纹理 + 高光 */
+  background:
+    repeating-radial-gradient(circle at 50% 50%,
+      rgba(255, 255, 255, 0.05) 0 1px,
+      transparent 1px 3px),
+    radial-gradient(circle at 50% 50%, #2a2a2c 0 34%, #141416 34% 100%);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 2px 8px rgba(0, 0, 0, 0.28);
+  animation: vinyl-spin 6s linear infinite;
+  animation-play-state: paused;      /* 默认静止 */
+}
+
+/* 中心自定义图片：唱片内部，随唱片一起转 */
+.vinyl-cover {
+  position: absolute;
+  inset: 26%;
+  width: 48%;
+  height: 48%;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14);
+}
+
+/* 中心孔 */
+.vinyl-hole {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 4px;
+  height: 4px;
+  margin: -2px 0 0 -2px;
+  border-radius: 50%;
+  background: var(--bg);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4);
+}
+
+/* 摇杆：默认停在外侧，播放时落到唱片上 */
+.vinyl-arm {
+  position: absolute;
+  top: -4%;
+  right: 4%;
+  width: 2px;
+  height: 58%;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #b9bcc2, #6f7379);
+  transform-origin: top center;
+  transform: rotate(-38deg);
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+}
+
+.vinyl::after {          /* 摇杆轴心 */
+  content: "";
+  position: absolute;
+  top: -6%;
+  right: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #9aa0a6;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.vinyl:hover .vinyl-disc { box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14), 0 3px 12px rgba(0, 0, 0, 0.34); }
+
+.vinyl.is-playing .vinyl-disc { animation-play-state: running; }
+.vinyl.is-playing .vinyl-arm { transform: rotate(8deg); }
+
+@keyframes vinyl-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vinyl-disc { animation-duration: 14s; }
+  .vinyl-arm { transition: none; }
+}
+
+@media (max-width: 700px) { .vinyl { display: none; } }

@@ -1,4 +1,6 @@
 ---
+import Vinyl from './Vinyl.astro';
+
 const { nav, activeSection } = Astro.props;
 ---
 
@@ -20,6 +22,7 @@ const { nav, activeSection } = Astro.props;
       </label>
 
       <div class="topbar-right">
+        <Vinyl />
         <a href="https://github.com/">GitHub</a>
 
         <div class="theme">
