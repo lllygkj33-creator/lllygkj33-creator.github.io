@@ -16,100 +16,106 @@
     </div>
     <span class="vinyl-arm" aria-hidden="true"></span>
   </div>
-
-  <audio id="vinyl-audio" src="/audio/song.mp3" preload="metadata" loop></audio>
 </div>
 
 <script>
-  // 用 astro:page-load 而不是直接执行：配合 transition:persist，
-  // 播放器节点跨页面保留，因此只在首次绑定时初始化一次，音乐不会因换页中断
-  const initVinyl = () => {
-    const wrap = document.getElementById('vinyl-root');
-    const vinyl = document.getElementById('vinyl');
-    const audio = document.getElementById('vinyl-audio');
-    if (!wrap || !vinyl || !audio || wrap.dataset.bound === '1') return;
-    wrap.dataset.bound = '1';
+  // 关键点：<audio> 不进 DOM，而是挂在 window 上。
+  // transition:persist 的节点在换页时会被"摘下再插入"，元素一旦离开文档，
+  // 浏览器（尤其 Safari）就会掐掉播放 —— 不放进被交换的 DOM 就没有这个问题，
+  // 而且同一个元素跨页复用，播放位置也不会丢。
+  const SHARED = window;
 
-    /* ── 歌词：读取 LRC，按当前播放时间切换行 ── */
+  const parseLrc = (text) =>
+    text
+      .split('\n')
+      .map((raw) => {
+        const m = raw.match(/^\[(\d+):(\d+(?:\.\d+)?)\]\s*(.*)$/);   // [mm:ss.xx] 歌词
+        if (!m) return null;
+        const body = m[3].trim();
+        if (!body) return null;
+        return { at: Number(m[1]) * 60 + Number(m[2]), text: body };
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.at - b.at);
+
+  // 每页都重新查节点：换页后是文档里的新节点，不能缓存引用
+  const render = () => {
+    const lines = SHARED.__vinylLines;
+    const audio = SHARED.__vinylAudio;
     const box = document.getElementById('vinyl-lyrics');
     const nowEl = document.getElementById('vinyl-line-now');
     const nextEl = document.getElementById('vinyl-line-next');
-    let lines = [];      // [{ at: 秒, text }]
-    let current = -1;
+    if (!lines || !lines.length || !audio || !box || !nowEl || !nextEl) return;
 
-    const parseLrc = (text) =>
-      text
-        .split('\n')
-        .map((raw) => {
-          const m = raw.match(/^\[(\d+):(\d+(?:\.\d+)?)\]\s*(.*)$/);   // [mm:ss.xx] 歌词
-          if (!m) return null;
-          const text2 = m[3].trim();
-          if (!text2) return null;
-          return { at: Number(m[1]) * 60 + Number(m[2]), text: text2 };
-        })
-        .filter(Boolean)
-        .sort((a, b) => a.at - b.at);
-
-    fetch('/audio/song.lrc')
-      .then((r) => (r.ok ? r.text() : ''))
-      .then((text) => {
-        lines = parseLrc(text);
-        if (!lines.length) return;
-        box.hidden = false;
-        render();
-      })
-      .catch(() => {});
-
-    const render = () => {
-      if (!lines.length) return;
-      const t = audio.currentTime;
-      let idx = -1;
-      for (let i = 0; i < lines.length; i++) if (lines[i].at <= t) idx = i;
-      if (idx !== current) {
-        current = idx;
-        nowEl.textContent = idx >= 0 ? lines[idx].text : '';
-        nextEl.textContent = lines[idx + 1] ? lines[idx + 1].text : '';
-        nowEl.classList.remove('flash');
-        void nowEl.offsetWidth;        // 重排一次，让动画可重复触发
-        if (idx >= 0) nowEl.classList.add('flash');
-      }
-    };
-
-    audio.addEventListener('timeupdate', render);
-    audio.addEventListener('seeked', render);
-
-    /* ── 播放 / 暂停 ──
-       点击后立即给出视觉反馈（唱片转、摇杆落），不等缓冲完成；
-       如果浏览器拒绝播放再把状态回退，避免"点了没反应"的观感。 */
-    const setPlaying = (on) => {
-      vinyl.classList.toggle('is-playing', on);
-      vinyl.setAttribute('aria-pressed', String(on));
-    };
-
-    const toggle = () => {
-      if (audio.paused) {
-        setPlaying(true);
-        const p = audio.play();
-        if (p && typeof p.catch === 'function') {
-          p.catch(() => setPlaying(false));   // 被拦截或加载失败时回退
-        }
-      } else {
-        audio.pause();
-        setPlaying(false);
-      }
-    };
-
-    // 整个播放器区域（含左侧歌词）都能点，不只是唱片本身
-    wrap.addEventListener('click', toggle);
-    wrap.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        toggle();
-      }
-    });
+    box.hidden = false;
+    const t = audio.currentTime;
+    // 二分找最后一条 at <= t
+    let lo = 0, hi = lines.length - 1, idx = -1;
+    while (lo <= hi) {
+      const mid = (lo + hi) >> 1;
+      if (lines[mid].at <= t) { idx = mid; lo = mid + 1; } else { hi = mid - 1; }
+    }
+    if (idx === (SHARED.__vinylIdx ?? -1)) return;   // 存 window 上, 脚本重跑也不会闪回
+    SHARED.__vinylIdx = idx;
+    nowEl.textContent = idx >= 0 ? lines[idx].text : '';
+    nextEl.textContent = lines[idx + 1] ? lines[idx + 1].text : '';
+    nowEl.classList.remove('flash');
+    void nowEl.offsetWidth;                      // 重排一次，让动画可重复触发
+    if (idx >= 0) nowEl.classList.add('flash');
   };
 
-  // 立即绑定一次（防止 astro:page-load 已错过），之后每次导航再绑定新节点
-  initVinyl();
+  const setPlaying = (on) => {
+    const vinyl = document.getElementById('vinyl');
+    if (!vinyl) return;
+    vinyl.classList.toggle('is-playing', on);
+    vinyl.setAttribute('aria-pressed', String(on));
+  };
+
+  const initVinyl = () => {
+    const wrap = document.getElementById('vinyl-root');
+    if (!wrap) return;
+
+    const audio = SHARED.__vinylAudio || (SHARED.__vinylAudio = Object.assign(new Audio('/audio/song.mp3'), {
+      loop: true,
+      preload: 'metadata',
+    }));
+
+    if (!audio.__vinylBound) {                   // 全局只绑一次
+      audio.__vinylBound = true;
+      fetch('/audio/song.lrc')
+        .then((r) => (r.ok ? r.text() : ''))
+        .then((text) => { SHARED.__vinylLines = parseLrc(text); render(); })
+        .catch(() => {});
+      audio.addEventListener('timeupdate', render);
+      audio.addEventListener('seeked', render);
+    }
+
+    if (wrap.dataset.bound !== '1') {            // 每个播放器节点绑一次
+      wrap.dataset.bound = '1';
+      const toggle = () => {
+        if (audio.paused) {
+          setPlaying(true);                      // 立即给反馈，不等缓冲
+          const p = audio.play();
+          if (p && typeof p.catch === 'function') p.catch(() => setPlaying(false));
+        } else {
+          audio.pause();
+          setPlaying(false);
+        }
+      };
+      // 整个区域（含左侧歌词）都能点，不只是唱片本身
+      wrap.addEventListener('click', toggle);
+      wrap.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggle();
+        }
+      });
+    }
+
+    setPlaying(!audio.paused);                   // 换页后按音频真实状态恢复唱片
+    render();
+  };
+
+  initVinyl();                                   // 立即执行一次，避免错过事件
   document.addEventListener('astro:page-load', initVinyl);
 </script>
