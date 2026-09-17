@@ -38,6 +38,8 @@ const markdown = JSON.stringify(`# ${title}\n\n${body}`).replace(/</g, '\\u003c'
       const theme = localStorage.getItem('theme');
       if (theme) root.dataset.theme = theme;
     </script>
+    <!-- 客户端路由：换页不重载整页，黑胶播放器（transition:persist）才能跨页继续放 -->
+    <ClientRouter />
   </head>
   <body>
     <Topbar nav={nav} activeSection={activeSection} />
