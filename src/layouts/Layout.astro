@@ -180,15 +180,18 @@ const markdown = JSON.stringify(`# ${title}\n\n${body}`).replace(/</g, '\\u003c'
           localStorage.setItem('toc', off ? 'off' : 'on');
           document.getElementById('toc-toggle')?.setAttribute('aria-expanded', String(!off));
         };
-        document.getElementById('toc-toggle')?.addEventListener('click', () => {
-          setToc(!root.classList.contains('toc-off'));
-        });
+        const tocBtn = document.getElementById('toc-toggle');
+        if (tocBtn && tocBtn.dataset.bound !== '1') {
+          tocBtn.dataset.bound = '1';
+          tocBtn.addEventListener('click', () => setToc(!root.classList.contains('toc-off')));
+        }
         setToc(root.classList.contains('toc-off'));
 
         // 复制当前页 markdown
         const copyBtn = document.getElementById('copy-md');
         const raw = document.getElementById('page-md');
-        if (copyBtn && raw) {
+        if (copyBtn && raw && copyBtn.dataset.bound !== '1') {
+          copyBtn.dataset.bound = '1';
           const label = copyBtn.querySelector('.stack span:last-child');
           copyBtn.addEventListener('click', async () => {
             await navigator.clipboard.writeText(JSON.parse(raw.textContent));
@@ -209,6 +212,7 @@ const markdown = JSON.stringify(`# ${title}\n\n${body}`).replace(/</g, '\\u003c'
         markToc();
       };
 
+      initPage();                                   // 立即执行一次，避免错过事件
       document.addEventListener('astro:page-load', initPage);
     </script>
   </body>

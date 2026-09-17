@@ -82,7 +82,8 @@ const { nav, activeSection } = Astro.props;
   const initTopbar = () => {
     // 搜索框：按当前左栏条目标题过滤
     const input = document.getElementById('nav-search');
-    if (input) {
+    if (input && input.dataset.bound !== '1') {
+      input.dataset.bound = '1';
       input.addEventListener('input', () => {
         const q = input.value.trim().toLowerCase();
         document.querySelectorAll('.side-group').forEach((g) => {
@@ -106,7 +107,8 @@ const { nav, activeSection } = Astro.props;
     // 深浅色切换
     const themeBtn = document.getElementById('theme-btn');
     const themeMenu = document.getElementById('theme-menu');
-    if (themeBtn && themeMenu) {
+    if (themeBtn && themeMenu && themeBtn.dataset.bound !== '1') {
+      themeBtn.dataset.bound = '1';
       themeBtn.addEventListener('click', () => {
         const open = themeMenu.hidden;
         themeMenu.hidden = !open;
@@ -122,5 +124,6 @@ const { nav, activeSection } = Astro.props;
     }
   };
 
+  initTopbar();                                   // 立即执行一次，避免错过事件
   document.addEventListener('astro:page-load', initTopbar);
 </script>

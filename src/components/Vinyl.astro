@@ -3,13 +3,13 @@
 // 点击后摇杆落下、唱片旋转并播放单曲；左侧歌词按 LRC 时间轴一行一行跟进，当前行高亮
 ---
 
-<div class="vinyl-root" id="vinyl-root" transition:persist>
+<div class="vinyl-root" id="vinyl-root" transition:persist role="button" tabindex="0" aria-label="播放或暂停黑胶单曲" aria-pressed="false">
   <div class="vinyl-lyrics" id="vinyl-lyrics" hidden>
     <span class="vinyl-line now" id="vinyl-line-now"></span>
     <span class="vinyl-line next" id="vinyl-line-next"></span>
   </div>
 
-  <div class="vinyl" id="vinyl" role="button" tabindex="0" aria-label="播放或暂停黑胶单曲" aria-pressed="false">
+  <div class="vinyl" id="vinyl">
     <div class="vinyl-disc">
       <span class="vinyl-label" aria-hidden="true"></span>
       <span class="vinyl-hole" aria-hidden="true"></span>
@@ -78,25 +78,30 @@
     audio.addEventListener('timeupdate', render);
     audio.addEventListener('seeked', render);
 
-    /* ── 播放 / 暂停 ── */
-    const toggle = async () => {
+    /* ── 播放 / 暂停 ──
+       点击后立即给出视觉反馈（唱片转、摇杆落），不等缓冲完成；
+       如果浏览器拒绝播放再把状态回退，避免"点了没反应"的观感。 */
+    const setPlaying = (on) => {
+      vinyl.classList.toggle('is-playing', on);
+      vinyl.setAttribute('aria-pressed', String(on));
+    };
+
+    const toggle = () => {
       if (audio.paused) {
-        try {
-          await audio.play();
-        } catch {
-          return;                       // 浏览器拦截自动播放时不改状态
+        setPlaying(true);
+        const p = audio.play();
+        if (p && typeof p.catch === 'function') {
+          p.catch(() => setPlaying(false));   // 被拦截或加载失败时回退
         }
-        vinyl.classList.add('is-playing');
-        vinyl.setAttribute('aria-pressed', 'true');
       } else {
         audio.pause();
-        vinyl.classList.remove('is-playing');
-        vinyl.setAttribute('aria-pressed', 'false');
+        setPlaying(false);
       }
     };
 
-    vinyl.addEventListener('click', toggle);
-    vinyl.addEventListener('keydown', (e) => {
+    // 整个播放器区域（含左侧歌词）都能点，不只是唱片本身
+    wrap.addEventListener('click', toggle);
+    wrap.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         toggle();
@@ -104,5 +109,7 @@
     });
   };
 
+  // 立即绑定一次（防止 astro:page-load 已错过），之后每次导航再绑定新节点
+  initVinyl();
   document.addEventListener('astro:page-load', initVinyl);
 </script>
