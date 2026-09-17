@@ -10,7 +10,7 @@ export const sections = [
   { id: 'content-quality', label: '内容质量评估', groups: [['dimensions', '维度'], ['examples', '实例']] },
   { id: 'skyscraper', label: '摩天大楼优化', groups: [['examples', '示例']] },
   { id: 'link-graph', label: '链接图谱', groups: [['concepts', '概览'], ['spec', '规范'], ['examples', '实例']] },
-  { id: 'brand-entity-audit', label: '品牌实体检测' },
+  { id: 'brand-entity-audit', label: '品牌实体检测', groups: [['concepts', '概念'], ['spec', '规范'], ['examples', '案例']] },
 ];
 
 /* 以后再加栏目：把对应那行移进上面的数组，并建好 content/<id>/index.md
