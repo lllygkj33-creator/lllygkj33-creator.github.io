@@ -3,9 +3,9 @@ import { getCollection } from 'astro:content';
 // 顶部横向菜单：顺序就是这里的顺序
 // groups 决定左栏分组的显示名和顺序；没列到的文件夹自动排在后面（用文件夹名当标题）
 export const sections = [
-  // groups 决定左栏分组的显示名和顺序；没列到的文件夹自动排在后面（用文件夹名当标题）
   { id: 'seo', label: 'SEO', groups: [['basics', '基础'], ['content', '内容'], ['on-page', '页面'], ['technical', '技术'], ['links', '链接'], ['analytics', '分析']] },
   { id: 'geo', label: 'GEO', groups: [['basics', '基础'], ['answers', '答案'], ['entities', '实体'], ['machine', '机器'], ['measurement', '测量'], ['platform', '平台']] },
+  { id: 'social', label: '社媒协作', groups: [['platforms', '平台']] },
   { id: 'google-algorithm', label: 'Google 算法', groups: [['overview', '概览'], ['quality', '质量'], ['semantics', '语义'], ['links', '链接'], ['signals', '信号']] },
   { id: 'content-quality', label: '内容质量评估', groups: [['dimensions', '维度'], ['examples', '实例']] },
   { id: 'skyscraper', label: '摩天大楼优化', groups: [['examples', '示例']] },
