@@ -1190,6 +1190,58 @@ html.toc-off .main { max-width: 72rem; }
 
 
 /* ---------- 顶栏右上的黑胶播放器 ---------- */
+:root { --lyric-now: #c2410c; --lyric-next: rgba(112, 112, 112, 0.75); }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --lyric-now: #e8a085; --lyric-next: rgba(158, 158, 158, 0.7); }
+}
+
+:root[data-theme="dark"] { --lyric-now: #e8a085; --lyric-next: rgba(158, 158, 158, 0.7); }
+
+.vinyl-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+/* 唱片左侧的歌词：当前行高亮，下一行淡显 */
+.vinyl-lyrics {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.1rem;
+  min-width: 0;
+  max-width: 15rem;
+  text-align: right;
+  line-height: 1.35;
+}
+
+.vinyl-line {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vinyl-line.now {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--lyric-now);
+}
+
+.vinyl-line.next {
+  font-size: 0.6875rem;
+  color: var(--lyric-next);
+}
+
+.vinyl-line.now.flash { animation: vinyl-line-in 0.32s ease-out; }
+
+@keyframes vinyl-line-in {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: none; }
+}
+
 .vinyl {
   position: relative;
   flex: none;
@@ -1280,4 +1332,6 @@ html.toc-off .main { max-width: 72rem; }
   .vinyl-arm { transition: none; }
 }
 
+/* 空间不够时先收起歌词，保留唱片 */
+@media (max-width: 1279px) { .vinyl-lyrics { display: none; } }
 @media (max-width: 700px) { .vinyl { display: none; } }

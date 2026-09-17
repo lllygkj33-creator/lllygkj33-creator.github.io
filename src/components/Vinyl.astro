@@ -1,13 +1,21 @@
 ---
-// 右上角黑胶播放器：默认静止，点击后摇杆落下 + 黑胶与中心图片同步旋转 + 播放单曲
+// 右上角黑胶播放器：默认静止；点击后摇杆落下、黑胶与中心图片同步旋转并播放单曲
+// 左侧歌词按 LRC 时间轴一行一行跟进，当前行高亮
 ---
 
-<div class="vinyl" id="vinyl" role="button" tabindex="0" aria-label="播放或暂停黑胶单曲" aria-pressed="false">
-  <div class="vinyl-disc">
-    <img class="vinyl-cover" src="/images/vinyl-cover.jpg" alt="" width="500" height="500" />
-    <span class="vinyl-hole" aria-hidden="true"></span>
+<div class="vinyl-wrap">
+  <div class="vinyl-lyrics" id="vinyl-lyrics" hidden>
+    <span class="vinyl-line now" id="vinyl-line-now"></span>
+    <span class="vinyl-line next" id="vinyl-line-next"></span>
   </div>
-  <span class="vinyl-arm" aria-hidden="true"></span>
+
+  <div class="vinyl" id="vinyl" role="button" tabindex="0" aria-label="播放或暂停黑胶单曲" aria-pressed="false">
+    <div class="vinyl-disc">
+      <img class="vinyl-cover" src="/images/vinyl-cover.jpg" alt="" width="500" height="500" />
+      <span class="vinyl-hole" aria-hidden="true"></span>
+    </div>
+    <span class="vinyl-arm" aria-hidden="true"></span>
+  </div>
 </div>
 
 <audio id="vinyl-audio" src="/audio/song.mp3" preload="metadata" loop></audio>
@@ -17,12 +25,61 @@
   const audio = document.getElementById('vinyl-audio');
 
   if (vinyl && audio) {
+    /* ── 歌词：读取 LRC，按当前播放时间切换行 ── */
+    const box = document.getElementById('vinyl-lyrics');
+    const nowEl = document.getElementById('vinyl-line-now');
+    const nextEl = document.getElementById('vinyl-line-next');
+    let lines = [];      // [{ at: 秒, text }]
+    let current = -1;
+
+    const parseLrc = (text) =>
+      text
+        .split('\n')
+        .map((raw) => {
+          const m = raw.match(/^\[(\d+):(\d+(?:\.\d+)?)\]\s*(.*)$/);   // [mm:ss.xx] 歌词
+          if (!m) return null;
+          const text2 = m[3].trim();
+          if (!text2) return null;
+          return { at: Number(m[1]) * 60 + Number(m[2]), text: text2 };
+        })
+        .filter(Boolean)
+        .sort((a, b) => a.at - b.at);
+
+    fetch('/audio/song.lrc')
+      .then((r) => (r.ok ? r.text() : ''))
+      .then((text) => {
+        lines = parseLrc(text);
+        if (!lines.length) return;
+        box.hidden = false;
+        render();
+      })
+      .catch(() => {});
+
+    const render = () => {
+      if (!lines.length) return;
+      const t = audio.currentTime;
+      let idx = -1;
+      for (let i = 0; i < lines.length; i++) if (lines[i].at <= t) idx = i;
+      if (idx !== current) {
+        current = idx;
+        nowEl.textContent = idx >= 0 ? lines[idx].text : '';
+        nextEl.textContent = lines[idx + 1] ? lines[idx + 1].text : '';
+        nowEl.classList.remove('flash');
+        void nowEl.offsetWidth;        // 重排一次，让动画可重复触发
+        if (idx >= 0) nowEl.classList.add('flash');
+      }
+    };
+
+    audio.addEventListener('timeupdate', render);
+    audio.addEventListener('seeked', render);
+
+    /* ── 播放 / 暂停 ── */
     const toggle = async () => {
       if (audio.paused) {
         try {
           await audio.play();
         } catch {
-          return; // 浏览器拦截自动播放时不改状态
+          return;                       // 浏览器拦截自动播放时不改状态
         }
         vinyl.classList.add('is-playing');
         vinyl.setAttribute('aria-pressed', 'true');
