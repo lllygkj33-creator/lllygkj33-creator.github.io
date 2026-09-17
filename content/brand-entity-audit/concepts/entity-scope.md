@@ -37,7 +37,7 @@ updated: "2026-09-17"
   </div>
   <div class="bae-col" data-tone="observation">
     <span class="bae-col-label">Bundle / Offer · 打包卖掉的东西</span>
-    <p>NAS Kit（Mini NAS Kit）：主机之外再给一套装机配件</p>
+    <p>Starter Bundle / NAS Kit：主机之外多给一套装机必备件</p>
     <p>Board Only：明确不含内存、不含电源适配器</p>
   </div>
 </div>
