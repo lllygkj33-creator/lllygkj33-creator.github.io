@@ -89,7 +89,7 @@ const markdown = JSON.stringify(`# ${title}\n\n${body}`).replace(/</g, '\\u003c'
           <Social class="social-inline" />
         </div>)}
 
-        <div class="prose"><slot /></div>
+        {compose ? <slot /> : <div class="prose"><slot /></div>}
 
         {(prev || next) && !compose && (
           <nav class="pager">

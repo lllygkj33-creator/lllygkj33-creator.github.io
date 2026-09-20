@@ -29,6 +29,14 @@ const PALETTE = [
   { bg: '#ff4813', ink: '#1a0a05', accent: '#3b0f04' },
 ];
 
+// 判断底色深浅：浅色底上白字读不出来，自动压一层暗罩
+const luminance = (hex) => {
+  const n = hex.replace('#', '');
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(n.slice(i, i + 2), 16) / 255);
+  const f = (x) => (x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4));
+  return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
+};
+
 const panels = nav.slice(0, PALETTE.length).map((section, i) => {
   const entries = [];
   for (const group of section.groups) {
@@ -41,12 +49,20 @@ const panels = nav.slice(0, PALETTE.length).map((section, i) => {
       if (!entries.some((e) => e.url === page.url)) entries.push({ label: page.title, meta: '', url: page.url });
     }
   }
+  // 白字方案：底色越浅，压暗越重（深色底给一点点，避免纯黑更沉）
+  const lum = luminance(PALETTE[i].bg);
+  const dim = lum > 0.55 ? 0.52 : lum > 0.3 ? 0.3 : lum > 0.12 ? 0.16 : 0;
+  const textScrim = dim
+    ? `linear-gradient(180deg, rgba(0,0,0,${(dim * 0.7).toFixed(2)}) 0%, rgba(0,0,0,${(dim * 0.35).toFixed(2)}) 45%, rgba(0,0,0,${dim.toFixed(2)}) 100%)`
+    : null;
+
   return {
     section,
     color: PALETTE[i],
     entries,
     no: String(i + 1).padStart(2, '0'),
     latin: /^[A-Za-z0-9 &]+$/.test(section.label),
+    textScrim,
   };
 });
 
@@ -55,7 +71,7 @@ const total = panels.length;
 
 <div class="guide" id="guide">
   {
-    panels.map(({ section, color, entries, no, latin }) => (
+    panels.map(({ section, color, entries, no, latin, textScrim }) => (
       <section
         class="gpanel"
         style={`--bg:${color.bg}; --ink:${color.ink}; --accent:${color.accent};${color.scrim ? ` --scrim:${color.scrim};` : ''}`}
@@ -63,6 +79,7 @@ const total = panels.length;
         data-video={color.video ? '1' : undefined}
       >
         <div class="gpanel-stage">
+          {textScrim && <span class="gpanel-textscrim" style={`background:${textScrim}`} aria-hidden="true" />}
           {color.video && (
             <>
               <video class="gpanel-video" src={color.video} muted playsinline loop preload="metadata" aria-hidden="true" />
@@ -153,16 +170,23 @@ const total = panels.length;
     padding: 0 3rem;
     will-change: transform;
   }
+  .gpanel-textscrim {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
   .gpanel-no {
     font-family: var(--mono);
     font-size: 0.8125rem;
     letter-spacing: 0.18em;
-    color: var(--accent);
+    color: #fff;
+    opacity: 0.72;
     align-self: center;
   }
   .gpanel-title {
     margin: 0;
-    color: var(--ink);
+    color: #fff;
     font-size: clamp(2.6rem, 10vw, 8.5rem);
     font-weight: 700;
     letter-spacing: -0.03em;
@@ -199,13 +223,13 @@ const total = panels.length;
     width: 26vh;
     aspect-ratio: 3 / 2;
     overflow: hidden;
-    border: 1px solid color-mix(in srgb, var(--ink) 26%, transparent);
+    border: 1px solid rgba(255, 255, 255, 0.28);
     border-radius: 12px;
-    background: color-mix(in srgb, var(--ink) 8%, transparent);
-    color: var(--ink);
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
     transition: width 0.55s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease;
   }
-  .gcard.is-active { width: 34vh; border-color: var(--accent); }
+  .gcard.is-active { width: 34vh; border-color: rgba(255, 255, 255, 0.85); }
   .gcard.is-near1 { width: 30vh; }
   .gcard.is-near2 { width: 28vh; }
   .gcard-index {
@@ -229,14 +253,14 @@ const total = panels.length;
   }
   .gcard-label { font-size: 0.9375rem; font-weight: 600; }
   .gcard-meta { font-size: 0.75rem; opacity: 0.65; }
-  .gcard-enter { background: color-mix(in srgb, var(--accent) 16%, transparent); }
+  .gcard-enter { background: color-mix(in srgb, #fff 14%, transparent); }
 
   .gpanel-count {
     position: absolute;
     right: 3rem;
     top: 2.5rem;
     z-index: 3;
-    color: var(--ink);
+    color: #fff;
     font-family: var(--mono);
     font-size: 0.75rem;
     letter-spacing: 0.14em;
@@ -247,7 +271,7 @@ const total = panels.length;
     left: 3rem;
     bottom: 2.5rem;
     z-index: 3;
-    color: var(--ink);
+    color: #fff;
     font-size: 0.6875rem;
     letter-spacing: 0.2em;
     text-transform: uppercase;
@@ -277,7 +301,8 @@ const total = panels.length;
 <script>
   const init = () => {
     const guide = document.getElementById('guide');
-    if (!guide) return;
+    if (!guide) { document.documentElement.classList.remove('guide-home'); return; }
+    document.documentElement.classList.add('guide-home');   // 首页隐藏右侧滚动条
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const finePointer = window.matchMedia('(pointer: fine)').matches;
