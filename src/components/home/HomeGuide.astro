@@ -7,8 +7,16 @@ import { getNav } from '../../lib/nav';
 const nav = await getNav();
 
 // 9 屏配色：酒红 / 米色 / 苹果青 / 墨黑 / 陶土 / 橄榄 / 石板蓝 / 梅紫 / 品牌橙
+// video  : 该屏的背景视频（放在 public/media/home/，留空则用纯色）
+// scrim  : 压在视频上的同色系叠色罩 —— 让视频吃进这一屏的颜色，同时保证文字可读
 const PALETTE = [
-  { bg: '#2b0705', ink: '#ff4813', accent: '#ff4813' },   // 01 SEO：酒红 + 橙色字
+  {
+    bg: '#2b0705',
+    ink: '#ff4813',
+    accent: '#ff4813',
+    video: '/media/home/seo.mp4',
+    scrim: 'linear-gradient(180deg, rgba(43,7,5,.78) 0%, rgba(43,7,5,.46) 42%, rgba(43,7,5,.86) 100%)',
+  },   // 01 SEO：酒红 + 橙色字（已接视频背景）
   { bg: '#efe3cf', ink: '#241f1a', accent: '#b4451f' },   // 02 GEO：米色
   { bg: '#0e6f6b', ink: '#f2fbf9', accent: '#ffd166' },   // 03 社媒联动：苹果青
   { bg: '#14161a', ink: '#f2ede3', accent: '#ff4813' },   // 04 Google 算法：墨黑
@@ -42,7 +50,27 @@ const total = panels.length;
 <div class="guide" id="guide">
   {
     panels.map(({ section, color, entries, no, latin }) => (
-      <section class="gpanel" style={`--bg:${color.bg}; --ink:${color.ink}; --accent:${color.accent}`} data-panel={no}>
+      <section
+        class="gpanel"
+        style={`--bg:${color.bg}; --ink:${color.ink}; --accent:${color.accent};${color.scrim ? ` --scrim:${color.scrim};` : ''}`}
+        data-panel={no}
+        data-video={color.video ? '1' : undefined}
+      >
+        {color.video && (
+          <>
+            <video
+              class="gpanel-video"
+              src={color.video}
+              muted
+              playsinline
+              loop
+              preload="metadata"
+              aria-hidden="true"
+            />
+            <span class="gpanel-scrim" aria-hidden="true" />
+          </>
+        )}
+
         <div class="gpanel-inner">
           <div class="gpanel-head">
             <span class="gpanel-no">{no}</span>
@@ -104,6 +132,27 @@ const total = panels.length;
     transition: clip-path 900ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
+  /* 背景视频：铺满整屏；不铺满的边用底色兜住 */
+  .gpanel-video {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 900ms ease;
+  }
+  .gpanel-video.is-ready { opacity: 1; }
+  /* 同色系叠色罩：视频吃进这一屏的颜色，文字仍然压得住 */
+  .gpanel-scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: var(--scrim, transparent);
+    pointer-events: none;
+  }
+
   .gpanel-inner {
     position: relative;
     z-index: 2;
@@ -127,6 +176,7 @@ const total = panels.length;
   }
   .gpanel-title {
     margin: 0;
+    color: var(--ink);
     font-size: clamp(2.6rem, 9vw, 7.5rem);
     font-weight: 700;
     letter-spacing: -0.03em;
@@ -142,7 +192,9 @@ const total = panels.length;
 
   .gpanel-sub { list-style: none; margin: 2.75rem 0 0; padding: 0; max-width: 46rem; }
   .gpanel-sub li { border-top: 1px solid color-mix(in srgb, var(--ink) 26%, transparent); }
+  .gpanel-sub a:visited { color: var(--ink); }
   .gpanel-sub a {
+    color: var(--ink);
     display: flex;
     align-items: baseline;
     gap: 1rem;
@@ -157,6 +209,7 @@ const total = panels.length;
   .gpanel-sub a:hover .gs-arrow { opacity: 1; transform: none; }
 
   .gpanel-enter {
+    color: var(--ink);
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
@@ -171,6 +224,7 @@ const total = panels.length;
   .gpanel-enter span { color: var(--accent); }
 
   .gpanel-count {
+    color: var(--ink);
     position: absolute;
     right: 3rem;
     bottom: 2.5rem;
@@ -180,6 +234,7 @@ const total = panels.length;
     opacity: 0.55;
   }
   .gpanel-hint {
+    color: var(--ink);
     position: absolute;
     left: 3rem;
     bottom: 2.5rem;
@@ -221,6 +276,22 @@ const total = panels.length;
         });
       }, { threshold: 0.3 });
       panels.forEach((p) => io.observe(p));
+
+      // 视频背景：进入这一屏才播放，离开就暂停；加载好再淡入（底色兜住加载中）
+      const vio = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          const video = e.target.querySelector('.gpanel-video');
+          if (!video) return;
+          if (e.isIntersecting) {
+            video.classList.add('is-ready');
+            const p = video.play();
+            if (p && typeof p.catch === 'function') p.catch(() => {});
+          } else {
+            video.pause();
+          }
+        });
+      }, { threshold: 0.15 });
+      panels.forEach((p) => { if (p.dataset.video === '1') vio.observe(p); });
     }
 
     root.classList.add('guide-snap');
