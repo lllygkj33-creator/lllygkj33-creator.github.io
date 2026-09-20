@@ -1,5 +1,5 @@
 ---
-title: Seo Geo Docs
+title: Karina Studio
 description: SEO / GEO 的方法与记录
 order: 0
 ---
