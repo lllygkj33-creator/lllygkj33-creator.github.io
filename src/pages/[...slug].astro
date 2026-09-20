@@ -5,12 +5,10 @@ import { getNav, sections, urlOf } from '../lib/nav';
 
 export async function getStaticPaths() {
   const pages = await getCollection('docs');
-  return pages
-    .filter((entry) => entry.id !== 'index')      // 首页由 src/pages/index.astro 提供
-    .map((entry) => ({
-      params: { slug: entry.id },
-      props: { entry },
-    }));
+  return pages.map((entry) => ({
+    params: { slug: entry.id === 'index' ? undefined : entry.id },
+    props: { entry },
+  }));
 }
 
 const { entry } = Astro.props;
@@ -35,6 +33,7 @@ const i = group ? group.pages.findIndex((p) => p.url === current) : -1;
   headings={headings}
   prev={i > 0 ? group.pages[i - 1] : undefined}
   next={i >= 0 ? group.pages[i + 1] : undefined}
+  intro={entry.id === 'index'}
 >
   <Content />
 </Layout>

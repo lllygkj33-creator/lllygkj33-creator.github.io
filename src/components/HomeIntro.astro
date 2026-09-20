@@ -1,0 +1,274 @@
+---
+// 首页开场 V2：两幕连续 Opening（仅首页渲染）
+//   Stage 1  电影字幕式短句 → 停在 At Karina. → GO
+//   Stage 2  超大橙色 KARINA / STUDIO 排版变换 → 橙色铺屏 → 揭开首页
+// 是否播放由 sessionStorage 决定；首帧是否覆盖由 <head> 内联脚本加上 html.intro-on 控制。
+// 只用 CSS + Web Animations API，无第三方动画库。
+const GHOSTS = ['SEO', 'GEO', 'XEO', 'GOOGLE', 'ALGORITHM', 'CASE', 'SEARCH', 'CONTENT', 'KARINA'];
+---
+
+<div id="home-intro" class="home-intro" role="dialog" aria-label="网站开场">
+  <!-- 第一幕：字幕 -->
+  <div class="intro-stage intro-stage-one" id="intro-stage-one">
+    <div class="intro-ghosts" aria-hidden="true">
+      {GHOSTS.map((word) => <span>{word}</span>)}
+    </div>
+
+    <div class="intro-center">
+      <p class="intro-caption-wrap" aria-hidden="true">
+        <span class="intro-caption" id="intro-caption"></span>
+      </p>
+
+      <button class="intro-enter" id="intro-enter" type="button" hidden>GO →</button>
+
+      <p class="visually-hidden">Karina Studio — SEO / GEO / XEO、Google 算法、真实案例</p>
+    </div>
+  </div>
+
+  <!-- 第二幕：Karina Studio 大字排版 -->
+  <div class="intro-stage intro-stage-two is-uppercase" id="intro-stage-two" hidden aria-hidden="true">
+    <div class="karina-type" id="karina-type">
+      <span class="karina-word" id="karina-word">Karina</span>
+      <span class="studio-word" id="studio-word">Studio</span>
+    </div>
+    <div class="karina-wipe" id="karina-wipe"></div>
+  </div>
+
+  <button class="intro-skip" id="intro-skip" type="button">Skip</button>
+</div>
+
+<script>
+  const KEY = 'homepage_intro_seen';
+
+  // 第一幕：正式文案（不要扩写）
+  const LINES = [
+    'SEO. GEO. XEO. In Google.',
+    'Google Algorithms.',
+    'Real Cases.',
+    'All Things You Wanna Know.',
+  ];
+  const LAST_LINE = 'At Karina.';
+
+  const EASE_IN = 'cubic-bezier(.22, 1, .36, 1)';
+  const EASE_OUT = 'cubic-bezier(.4, 0, 1, 1)';
+  const ENTER_KF = [
+    { opacity: 0, transform: 'translateY(22px) scale(.97)', filter: 'blur(6px)' },
+    { opacity: 1, transform: 'translateY(0) scale(1)', filter: 'blur(0)' },
+  ];
+  const EXIT_KF = [
+    { opacity: 1, transform: 'translateY(0) scale(1)', filter: 'blur(0)' },
+    { opacity: 0, transform: 'translateY(-16px) scale(1.02)', filter: 'blur(4px)' },
+  ];
+
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+  const isSeen = () => { try { return sessionStorage.getItem(KEY) === '1'; } catch { return false; } };
+  const markSeen = () => { try { sessionStorage.setItem(KEY, '1'); } catch { /* 隐私模式忽略 */ } };
+
+  let phase = 'idle';            // idle / stage1 / waiting-go / stage2 / revealing / done
+  const running = new Set();
+
+  const play = (el, kf, opts) => {
+    const anim = el.animate(kf, opts);
+    running.add(anim);
+    anim.finished.catch(() => {}).finally(() => running.delete(anim));
+    return anim;
+  };
+
+  const init = () => {
+    const intro = document.getElementById('home-intro');
+    const root = document.documentElement;
+    const alive = () => document.body.contains(intro);
+
+    if (!intro) {                                  // 内页：清掉可能残留的开场状态
+      root.classList.remove('intro-on');
+      running.forEach((a) => a.cancel());
+      running.clear();
+      phase = 'done';
+      return;
+    }
+    if (phase === 'done' || intro.dataset.done === '1') return;
+    if (isSeen()) {                                // 本 session 看过：直接收掉
+      intro.hidden = true;
+      root.classList.remove('intro-on');
+      phase = 'done';
+      return;
+    }
+    if (phase !== 'idle') return;                  // 已经在跑（astro:page-load 会再调一次）
+    root.classList.add('intro-on');
+
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const stageOne = intro.querySelector('#intro-stage-one');
+    const stageTwo = intro.querySelector('#intro-stage-two');
+    const caption = intro.querySelector('#intro-caption');
+    const go = intro.querySelector('#intro-enter');
+    const skip = intro.querySelector('#intro-skip');
+    const typeWrap = intro.querySelector('#karina-type');
+    const karinaWord = intro.querySelector('#karina-word');
+    const studioWord = intro.querySelector('#studio-word');
+    const wipe = intro.querySelector('#karina-wipe');
+    const homeEls = [document.querySelector('.layout'), document.querySelector('.footer')].filter(Boolean);
+
+    const fadeInHome = (duration, delay) => homeEls.forEach((el) => play(el, [
+      { opacity: 0, transform: 'translateY(8px)' },
+      { opacity: 1, transform: 'translateY(0)' },
+    ], { duration, delay, easing: EASE_IN, fill: 'forwards' }));
+
+    const finish = () => {
+      if (!alive() || phase === 'done') return;
+      phase = 'done';
+      markSeen();
+      intro.dataset.done = '1';
+      intro.hidden = true;
+      root.classList.remove('intro-on');
+      running.forEach((a) => a.cancel());
+      running.clear();
+    };
+
+    // Skip 与"减少动效"走的短过渡：淡出开场层，不做橙色铺屏
+    const shortReveal = async () => {
+      if (!alive() || phase === 'done' || phase === 'revealing') return;
+      phase = 'revealing';
+      fadeInHome(240, 0);
+      const fade = play(intro, [{ opacity: 1 }, { opacity: 0 }], { duration: 260, easing: EASE_OUT, fill: 'forwards' });
+      await fade.finished.catch(() => {});
+      finish();
+    };
+
+    // ── 第二幕：四个 Beat → 橙色铺屏 → 揭开首页 ──
+    const stageTwoRun = async () => {
+      if (!alive()) return;
+      phase = 'stage2';
+      intro.classList.add('is-stage-two');
+      stageOne.hidden = true;
+      stageTwo.hidden = false;
+
+      // Beat A：巨大的 KARINA 从下方长出来
+      karinaWord.style.opacity = '1';
+      await play(karinaWord, [
+        { transform: 'translateY(20%) scaleX(.75)', clipPath: 'inset(100% 0 0 0)' },
+        { transform: 'translateY(0) scaleX(1)', clipPath: 'inset(0 0 0 0)' },
+      ], { duration: 450, easing: EASE_IN, fill: 'forwards' }).finished.catch(() => {});
+      if (!alive()) return;
+
+      // Beat B：横向拉伸 + 压紧字距，STUDIO 从右下进入
+      const beatB = play(karinaWord, [
+        { transform: 'translateX(0) scaleX(1)', letterSpacing: '-0.04em' },
+        { transform: 'translateX(-4vw) scaleX(1.2)', letterSpacing: '-0.08em' },
+      ], { duration: 450, easing: EASE_IN, fill: 'forwards' });
+      play(studioWord, [
+        { transform: 'translate(30%, 40%) scale(.86)', opacity: 0, clipPath: 'inset(0 0 100% 0)' },
+        { transform: 'translate(0, 0) scale(1)', opacity: 1, clipPath: 'inset(0 0 0 0)' },
+      ], { duration: 480, delay: 220, easing: EASE_IN, fill: 'forwards' });
+      await beatB.finished.catch(() => {});
+      if (!alive()) return;
+
+      // Beat C：STUDIO 接管画面，两词咬合但仍可读
+      const beatC = play(typeWrap, [
+        { transform: 'scale(1)', gap: '0.06em' },
+        { transform: 'scale(1.03)', gap: '-0.12em' },
+      ], { duration: 500, easing: EASE_IN, fill: 'forwards' });
+      play(karinaWord, [
+        { transform: 'translateX(-4vw) scaleX(1.2)' },
+        { transform: 'translateX(0) scaleX(.94)' },
+      ], { duration: 500, easing: EASE_IN, fill: 'forwards' });
+      await beatC.finished.catch(() => {});
+      if (!alive()) return;
+
+      // Beat D：收束成正常的 Karina Studio（大小写与字距归位）
+      stageTwo.classList.remove('is-uppercase');
+      await play(typeWrap, [
+        { transform: 'scale(1.03)', letterSpacing: '-0.02em' },
+        { transform: 'scale(1)', letterSpacing: '-0.03em' },
+      ], { duration: 450, easing: EASE_IN, fill: 'forwards' }).finished.catch(() => {});
+      if (!alive()) return;
+
+      await sleep(260);                            // 停一下，让人真的读到品牌名
+      if (!alive()) return;
+
+      // 橙色铺屏：字形继续放大，橙色层同时从字后扩张
+      phase = 'revealing';
+      await Promise.all([
+        play(karinaWord, [
+          { transform: 'scale(1)', opacity: 1 },
+          { transform: 'scale(14)', opacity: 1 },
+        ], { duration: 400, easing: EASE_IN, fill: 'forwards' }).finished,
+        play(wipe, [
+          { transform: 'scale(.05)', opacity: 0 },
+          { transform: 'scale(1)', opacity: 1 },
+        ], { duration: 400, easing: EASE_IN, fill: 'forwards' }).finished,
+      ]).catch(() => {});
+      if (!alive()) return;
+
+      // 整屏已是橙色：覆盖层自身背景转透明，橙色层向上揭开，露出首页
+      intro.classList.add('is-wipe');
+      typeWrap.style.opacity = '0';
+      fadeInHome(560, 60);
+      await play(wipe, [
+        { clipPath: 'inset(0 0 0 0)' },
+        { clipPath: 'inset(0 0 100% 0)' },
+      ], { duration: 560, easing: EASE_IN, fill: 'forwards' }).finished.catch(() => {});
+      finish();
+    };
+
+    // 减少动效：静态两行 + GO；点击后静态品牌名短暂停留，再淡出
+    const reducedRun = () => {
+      phase = 'stage1';
+      caption.classList.add('intro-caption-multi');
+      caption.innerHTML = '<span>SEO. GEO. XEO.</span><span class="is-last">At Karina.</span>';
+      caption.style.opacity = '1';
+      go.hidden = false;
+      go.dataset.on = '1';
+      phase = 'waiting-go';
+      go.addEventListener('click', async () => {
+        if (phase !== 'waiting-go') return;
+        phase = 'stage2';
+        stageOne.hidden = true;
+        stageTwo.hidden = false;
+        stageTwo.classList.remove('is-uppercase');
+        karinaWord.style.opacity = '1';
+        studioWord.style.opacity = '1';
+        await sleep(220);
+        shortReveal();
+      });
+    };
+
+    const stageOneRun = async () => {
+      phase = 'stage1';
+      for (const line of LINES) {
+        caption.textContent = line;
+        await play(caption, ENTER_KF, { duration: 340, easing: EASE_IN, fill: 'both' }).finished.catch(() => {});
+        await sleep(380);
+        await play(caption, EXIT_KF, { duration: 230, easing: EASE_OUT, fill: 'both' }).finished.catch(() => {});
+      }
+      if (!alive()) return;
+
+      caption.textContent = LAST_LINE;              // 最后一幕停在 At Karina.
+      caption.classList.add('is-last');
+      await play(caption, ENTER_KF, { duration: 360, easing: EASE_IN, fill: 'both' }).finished.catch(() => {});
+      await sleep(380);
+      if (!alive()) return;
+      phase = 'waiting-go';
+      go.hidden = false;
+      requestAnimationFrame(() => { go.dataset.on = '1'; });
+    };
+
+    // GO 不再进入首页，而是触发第二幕
+    go.addEventListener('click', () => {
+      if (reduced) return;                 // 减少动效由 reducedRun 的短路径处理，不走两幕动画
+      if (phase !== 'waiting-go') return;
+      go.disabled = true;
+      go.dataset.on = '0';
+      stageTwoRun();
+    });
+
+    // Skip：任何一幕都能立即结束 Opening，但仍走一个短过渡
+    skip.addEventListener('click', () => shortReveal());
+
+    intro.dataset.started = '1';                   // 告诉兜底脚本"序列活着"
+    if (reduced) reducedRun();
+    else stageOneRun();
+  };
+
+  init();
+  document.addEventListener('astro:page-load', init);
+</script>

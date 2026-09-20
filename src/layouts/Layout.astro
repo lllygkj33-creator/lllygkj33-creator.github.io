@@ -3,7 +3,7 @@ import { ClientRouter } from 'astro:transitions';
 import Topbar from '../components/Topbar.astro';
 import Sidebar from '../components/Sidebar.astro';
 import Social from '../components/Social.astro';
-import SiteFooter from '../components/SiteFooter.astro';
+import HomeIntro from '../components/HomeIntro.astro';
 import '../styles/global.css';
 
 const {
@@ -18,6 +18,7 @@ const {
   headings = [],
   prev,
   next,
+  intro = false,
 } = Astro.props;
 
 const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
@@ -41,8 +42,27 @@ const markdown = JSON.stringify(`# ${title}\n\n${body}`).replace(/</g, '\\u003c'
     </script>
     <!-- 客户端路由：换页不重载整页，黑胶播放器（transition:persist）才能跨页继续放 -->
     <ClientRouter />
+    {intro && (
+      <script is:inline>
+        // 首页开场：在首帧之前就决定是否覆盖，避免"先闪一下首页"
+        // 9 秒兜底：即使前端脚本没跑起来，也绝不让 Intro 挡住首页
+        try {
+          if (!sessionStorage.getItem('homepage_intro_seen')) {
+            document.documentElement.classList.add('intro-on');
+            setTimeout(function () {
+              // 只在"序列根本没启动"时兜底放行；JS 正常时用户停在 At Karina. / GO 界面多久都不打扰
+              var el = document.getElementById('home-intro');
+              if (!el || (el.dataset.started !== '1' && el.dataset.done !== '1')) {
+                document.documentElement.classList.remove('intro-on');
+              }
+            }, 9000);
+          }
+        } catch (e) {}
+      </script>
+    )}
   </head>
   <body>
+    {intro && <HomeIntro />}
     <Topbar nav={nav} activeSection={activeSection} />
 
     <div class="layout">
@@ -114,7 +134,32 @@ const markdown = JSON.stringify(`# ${title}\n\n${body}`).replace(/</g, '\\u003c'
       )}
     </div>
 
-    <SiteFooter nav={nav} />
+    <footer class="footer">
+      <div class="footer-in">
+        <div class="footer-top">
+          <div class="footer-brand">
+            <a class="brand" href="/">
+              <img class="brand-logo footer-logo" src="/logo.webp" alt="" width="76" height="30" />
+              <span>Seo Geo Docs</span>
+            </a>
+            <p>SEO / GEO 的方法与记录</p>
+          </div>
+
+          <div class="footer-col">
+            <p>Content</p>
+            {nav.map((s) => <a href={s.url}>{s.label}</a>)}
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <span>© 2026 seo/geo docs</span>
+          <div class="footer-links">
+            <a href="https://github.com/">GitHub</a>
+            <Social class="social-footer" />
+          </div>
+        </div>
+      </div>
+    </footer>
 
     <script type="application/json" id="page-md" set:html={markdown} />
 
