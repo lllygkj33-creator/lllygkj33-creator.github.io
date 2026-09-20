@@ -1797,3 +1797,68 @@ html.intro-on .home-intro { display: flex; align-items: center; justify-content:
   .intro-ghosts span { animation: none; }
   .intro-enter { transition: none; }
 }
+
+/* ── 首页开场第二幕：Karina Studio 大字排版 + 橙色铺屏 ────────────────────
+   四个 Beat（KARINA 长出 → 横向拉伸 → STUDIO 接管 → 收束）由 WAAPI 驱动，
+   这里只定义静态排版、橙色色值与铺屏层。
+   ------------------------------------------------------------------ */
+.home-intro { --karina-orange: #ff5a1f; }
+.home-intro.is-stage-two { background: #240502; }
+.home-intro.is-wipe { background: transparent; }
+
+.intro-stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.intro-stage[hidden] { display: none !important; }
+
+.karina-type {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.06em;
+  width: 100%;
+  transform-origin: 50% 50%;
+  will-change: transform, opacity;
+}
+.karina-word,
+.studio-word {
+  display: block;
+  font-weight: 700;
+  line-height: 0.86;
+  letter-spacing: -0.04em;
+  color: var(--karina-orange);
+  white-space: nowrap;
+  opacity: 0;
+}
+.karina-word { font-size: clamp(3.4rem, 26vw, 20rem); }
+.studio-word { font-size: clamp(2.6rem, 21vw, 16rem); margin-top: -0.05em; }
+.intro-stage-two.is-uppercase .karina-word,
+.intro-stage-two.is-uppercase .studio-word { text-transform: uppercase; }
+
+.karina-wipe {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: var(--karina-orange);
+  transform: scale(0.05);
+  opacity: 0;
+  will-change: transform, clip-path;
+}
+
+.intro-enter {
+  transition: opacity 420ms ease, transform 260ms ease;
+}
+.intro-enter:hover,
+.intro-enter:focus-visible { transform: translateX(3px); }
+
+@media (max-width: 700px) {
+  .karina-word { font-size: clamp(4.8rem, 24vw, 8rem); }
+  .studio-word { font-size: clamp(4rem, 20vw, 6.6rem); }
+}

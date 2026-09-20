@@ -50,7 +50,7 @@ const markdown = JSON.stringify(`# ${title}\n\n${body}`).replace(/</g, '\\u003c'
           if (!sessionStorage.getItem('homepage_intro_seen')) {
             document.documentElement.classList.add('intro-on');
             setTimeout(function () {
-              // 只在"序列根本没启动"时兜底放行；JS 正常时用户停在 J Min. 界面多久都不打扰
+              // 只在"序列根本没启动"时兜底放行；JS 正常时用户停在 At Karina. / GO 界面多久都不打扰
               var el = document.getElementById('home-intro');
               if (!el || (el.dataset.started !== '1' && el.dataset.done !== '1')) {
                 document.documentElement.classList.remove('intro-on');
