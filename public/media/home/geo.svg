@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640" width="960" height="640" role="img" aria-label="geo cover">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#240502"/><stop offset="0.62" stop-color="#5b1a08"/><stop offset="1" stop-color="#240502"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="640" fill="url(#g)"/>
+  <circle cx="480" cy="360" r="90" fill="none" stroke="#ff6a2a" stroke-opacity="0.22" stroke-width="2"/><circle cx="480" cy="360" r="160" fill="none" stroke="#ff6a2a" stroke-opacity="0.19" stroke-width="2"/><circle cx="480" cy="360" r="230" fill="none" stroke="#ff6a2a" stroke-opacity="0.16" stroke-width="2"/><circle cx="480" cy="360" r="300" fill="none" stroke="#ff6a2a" stroke-opacity="0.13" stroke-width="2"/><circle cx="480" cy="360" r="370" fill="none" stroke="#ff6a2a" stroke-opacity="0.10" stroke-width="2"/><circle cx="480" cy="360" r="440" fill="none" stroke="#ff6a2a" stroke-opacity="0.07" stroke-width="2"/>
+</svg>

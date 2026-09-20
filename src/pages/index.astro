@@ -1,0 +1,51 @@
+---
+// 首页：Karina Studio Motion Landing（品牌入口层）
+// Documentation 是下一层——用户在卡片里做出选择后才进入
+import '../styles/global.css';
+import { ClientRouter } from 'astro:transitions';
+import MotionIntro from '../components/home/MotionIntro.astro';
+import KarinaHero from '../components/home/KarinaHero.astro';
+import DirectoryCards from '../components/home/DirectoryCards.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import { getNav } from '../lib/nav';
+
+const nav = await getNav();
+const title = 'Karina Studio — SEO / GEO / XEO 知识库';
+const description = 'Karina Studio：SEO、GEO、社媒联动、Google 算法与摩天大楼优化的知识库入口。';
+---
+
+<!doctype html>
+<html lang="en" class="motion-home">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href="/logo.webp" />
+    <script is:inline>
+      // 首帧前决定两件事，避免"先闪一下再播"：
+      //   motion-js      有 JS 且不要求减少动效 → 大字先隐藏，等进了视口再动
+      //   motion-pending 本 session 还没看过字幕 → 先藏起静态末句
+      // 8.5 秒兜底：脚本万一没跑起来，首页也一定完整可见
+      try {
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.documentElement.classList.add('motion-js');
+          if (!sessionStorage.getItem('homepage_intro_seen')) {
+            document.documentElement.classList.add('motion-pending');
+            setTimeout(function () {
+              document.documentElement.classList.remove('motion-pending');
+            }, 8500);
+          }
+        }
+      } catch (e) {}
+    </script>
+    <ClientRouter />
+  </head>
+  <body class="motion-home-body">
+    <MotionIntro />
+    <KarinaHero />
+    <DirectoryCards />
+
+    <SiteFooter nav={nav} />
+  </body>
+</html>

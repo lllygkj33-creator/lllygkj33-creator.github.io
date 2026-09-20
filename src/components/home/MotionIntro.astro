@@ -1,0 +1,150 @@
+---
+// 第一屏：电影字幕式 Intro
+// 无 JS / 减少动效 / 本 session 已看过 → 直接显示末句 + GO Document Now
+import { INTRO_CAPTIONS, HERO_ANCHOR } from '../../lib/home';
+const GHOSTS = ['SEO', 'GEO', 'XEO', 'GOOGLE', 'ALGORITHM', 'CASE', 'SEARCH', 'CONTENT', 'KARINA'];
+---
+
+<section class="motion-intro" id="motion-intro">
+  <div class="motion-ghosts" aria-hidden="true">
+    {GHOSTS.map((word) => <span>{word}</span>)}
+  </div>
+
+  <div class="motion-intro-inner">
+    <!-- 播放态：由脚本逐句 / 逐词组补全 -->
+    <p class="motion-caption is-live" id="motion-caption" aria-hidden="true">
+      <span id="motion-caption-base"></span><span class="motion-caption-add" id="motion-caption-add"></span>
+    </p>
+
+    <!-- 静态末态：无 JS 时也成立（首屏即完整可读、可点） -->
+    <div class="motion-intro-final" id="motion-intro-final">
+      <p class="motion-caption is-last" id="motion-caption-final">{INTRO_CAPTIONS.last}</p>
+      <a class="motion-go" id="motion-go" href={`#${HERO_ANCHOR}`}>{INTRO_CAPTIONS.cta}</a>
+    </div>
+  </div>
+
+  <span class="motion-scroll-hint" aria-hidden="true">Scroll</span>
+</section>
+
+<script>
+  import { INTRO_CAPTIONS, HERO_ANCHOR } from '../../lib/home';
+
+  const KEY = 'homepage_intro_seen';
+  const EASE_IN = 'cubic-bezier(.22, 1, .36, 1)';
+  const EASE_OUT = 'cubic-bezier(.4, 0, 1, 1)';
+  const ADD_KF = [
+    { opacity: 0, transform: 'translateY(12px)', filter: 'blur(4px)' },
+    { opacity: 1, transform: 'translateY(0)', filter: 'blur(0)' },
+  ];
+  const ENTER_KF = [
+    { opacity: 0, transform: 'translateY(22px) scale(.98)', filter: 'blur(6px)' },
+    { opacity: 1, transform: 'translateY(0) scale(1)', filter: 'blur(0)' },
+  ];
+  const EXIT_KF = [
+    { opacity: 1, transform: 'translateY(0) scale(1)', filter: 'blur(0)' },
+    { opacity: 0, transform: 'translateY(-16px) scale(1.02)', filter: 'blur(4px)' },
+  ];
+
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const seen = () => { try { return sessionStorage.getItem(KEY) === '1'; } catch { return false; } };
+  const markSeen = () => { try { sessionStorage.setItem(KEY, '1'); } catch { /* 隐私模式 */ } };
+
+  let running = false;
+
+  const init = () => {
+    const section = document.getElementById('motion-intro');
+    const go = document.getElementById('motion-go');
+    if (!section) return;
+
+    // GO：只做平滑滚动，不改 URL（无 JS 时锚点本身也能跳）
+    if (go && go.dataset.bound !== '1') {
+      go.dataset.bound = '1';
+      go.addEventListener('click', (e) => {
+        const target = document.getElementById(HERO_ANCHOR);
+        if (!target) return;
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+
+    const root = document.documentElement;
+    const final = document.getElementById('motion-intro-final');
+    const live = document.getElementById('motion-caption');
+    const baseEl = document.getElementById('motion-caption-base');
+    const addEl = document.getElementById('motion-caption-add');
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // 本 session 已看过 / 减少动效 / 无脚本能力 → 保持静态末态
+    if (seen() || reduced || !live || !baseEl || !addEl || !final) {
+      root.classList.remove('motion-pending');
+      return;
+    }
+    if (running) return;
+    running = true;
+
+    const play = (el, kf, opts) => el.animate(kf, opts).finished.catch(() => {});
+
+    // 逐词组补全：只让新增的那一段进入，旧文字保持原位
+    const revealPhrases = async (phrases, step, hold) => {
+      let shown = '';
+      for (const phrase of phrases) {
+        const delta = phrase.slice(shown.length);
+        addEl.textContent = delta;
+        await play(addEl, ADD_KF, { duration: 260, easing: EASE_IN, fill: 'both' });
+        shown = phrase;
+        baseEl.textContent = phrase;
+        addEl.textContent = '';
+        addEl.getAnimations().forEach((a) => a.cancel());
+        await sleep(Math.max(0, step - 260));
+      }
+      await sleep(hold);
+    };
+
+    // 整句行：只改 base span 的文字，绝不覆盖容器（否则 base/add 会被挤出 DOM，
+    // 后面的逐词组补全会写进脱离文档的节点，屏幕上一片空白）
+    const playPlain = async (text, enter, hold, exit) => {
+      addEl.textContent = '';
+      baseEl.textContent = text;
+      await play(live, ENTER_KF, { duration: enter, easing: EASE_IN, fill: 'both' });
+      await sleep(hold);
+      await play(live, EXIT_KF, { duration: exit, easing: EASE_OUT, fill: 'both' });
+      baseEl.textContent = '';
+      live.getAnimations().forEach((a) => a.cancel());
+    };
+
+    // 顺序：progressive(1) → plain(2) → plain(3) → progressive(4) → 末句
+    const sequence = async () => {
+      section.classList.add('is-playing');
+      root.classList.remove('motion-pending');
+      await sleep(120);
+
+      const [p1, p4] = INTRO_CAPTIONS.progressive;
+      const [s2, s3] = INTRO_CAPTIONS.plain;
+
+      for (const [stepFn, cfg] of [
+        [() => revealPhrases(p1.phrases, p1.step, p1.hold), p1],
+        [() => playPlain(s2.text, s2.enter, s2.hold, s2.exit), s2],
+        [() => playPlain(s3.text, s3.enter, s3.hold, s3.exit), s3],
+        [() => revealPhrases(p4.phrases, p4.step, p4.hold), p4],
+      ]) {
+        if (!document.body.contains(section)) return;   // 已经离开首页就别继续
+        await stepFn();
+        baseEl.textContent = '';
+        addEl.textContent = '';
+        live.getAnimations().forEach((a) => a.cancel());
+      }
+
+      if (!document.body.contains(section)) return;
+      baseEl.textContent = INTRO_CAPTIONS.last;
+      await play(live, ENTER_KF, { duration: 360, easing: EASE_IN, fill: 'both' });
+      await sleep(420);
+      section.classList.remove('is-playing');           // 交回静态末态（含 GO 按钮）
+      markSeen();
+    };
+
+    sequence();
+  };
+
+  init();
+  document.addEventListener('astro:page-load', init);
+</script>

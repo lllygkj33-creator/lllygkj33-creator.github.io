@@ -1,0 +1,85 @@
+---
+// 第二屏：KARINA / STUDIO 大号橙色排版（进入视口播放一次）
+---
+
+<section class="karina-hero" id="karina-studio">
+  <div class="karina-meta" aria-hidden="true">
+    <span>SEO / GEO / XEO<br />KNOWLEDGE SYSTEM</span>
+    <span>KARINA STUDIO</span>
+    <span>DOCS<br />2026</span>
+  </div>
+
+  <h1 class="karina-type" id="karina-type">
+    <span class="karina-word" id="karina-word">Karina</span><span class="karina-tail" id="karina-tail"><span class="karina-slash" id="karina-slash">/</span><span class="karina-word karina-studio-word" id="studio-word">Studio</span></span>
+  </h1>
+
+  <p class="karina-note">继续向下滚动，选择你要进入的知识目录</p>
+</section>
+
+<script>
+  const EASE_IN = 'cubic-bezier(.22, 1, .36, 1)';
+
+  const init = () => {
+    const section = document.getElementById('karina-studio');
+    const type = document.getElementById('karina-type');
+    const kw = document.getElementById('karina-word');
+    const slash = document.getElementById('karina-slash');
+    const sw = document.getElementById('studio-word');
+    if (!section || !type || !kw || !slash || !sw) return;
+    if (section.dataset.played === '1' || section.dataset.bound === '1') return;
+
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const play = (el, kf, opts) => el.animate(kf, opts).finished.catch(() => {});
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+    const settle = () => {
+      section.dataset.played = '1';
+      section.classList.add('is-settled');       // 终点状态交给 CSS，动画结束后不留 fill
+    };
+
+    const run = async () => {
+      section.dataset.played = '1';
+      if (reduced) { settle(); return; }
+
+      // Beat 1：KARINA 从下方"长出来"
+      await play(kw, [
+        { clipPath: 'inset(100% 0 0 0)', transform: 'translateY(14%)' },
+        { clipPath: 'inset(0 0 0 0)', transform: 'translateY(0)' },
+      ], { duration: 620, easing: EASE_IN, fill: 'both' });
+      if (!document.body.contains(section)) return;
+      await sleep(90);
+
+      // Beat 2：斜杠快速出现
+      await play(slash, [
+        { opacity: 0, transform: 'scale(.6)' },
+        { opacity: 1, transform: 'scale(1)' },
+      ], { duration: 220, easing: EASE_IN, fill: 'both' });
+      if (!document.body.contains(section)) return;
+
+      // Beat 3：STUDIO 从右侧补入
+      await play(sw, [
+        { clipPath: 'inset(0 100% 0 0)', transform: 'translateX(6%)' },
+        { clipPath: 'inset(0 0 0 0)', transform: 'translateX(0)' },
+      ], { duration: 520, easing: EASE_IN, fill: 'both' });
+      if (!document.body.contains(section)) return;
+      await sleep(120);
+
+      // Beat 4：整组轻微横向拉伸 + 字距收紧，然后停住
+      await play(type, [
+        { transform: 'scaleX(1)', letterSpacing: '-0.045em' },
+        { transform: 'scaleX(1.08)', letterSpacing: '-0.06em' },
+      ], { duration: 520, easing: EASE_IN, fill: 'both' });
+      settle();
+    };
+
+    section.dataset.bound = '1';
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); run(); }
+    }, { threshold: 0.35 });
+
+    if (reduced) settle(); else io.observe(section);
+  };
+
+  init();
+  document.addEventListener('astro:page-load', init);
+</script>

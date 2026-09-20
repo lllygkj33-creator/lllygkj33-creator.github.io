@@ -1,0 +1,71 @@
+---
+// 第三屏：5 张目录入口卡（整卡可点，媒体支持 video / image / fallback）
+import { HOME_CARDS } from '../../lib/home';
+---
+
+<section class="karina-cards" id="directory">
+  <div class="cards-head">
+    <h2>目录</h2>
+    <p>先选一个方向进入，Documentation 是下一层。</p>
+  </div>
+
+  <div class="cards-grid">
+    {
+      HOME_CARDS.map((card) => (
+        <a class="home-card" href={card.href} data-size={card.size} data-offset={card.offset} data-card={card.id}>
+          <span class="home-card-media">
+            {card.mediaType === 'video' && card.video ? (
+              <video src={card.video} poster={card.poster} muted playsinline loop autoplay preload="metadata" aria-hidden="true" />
+            ) : card.media ? (
+              <img src={card.media} alt="" width="960" height="640" loading="lazy" decoding="async" />
+            ) : (
+              <span class="home-card-fallback" aria-hidden="true" />
+            )}
+          </span>
+
+          <span class="home-card-foot">
+            <span class="home-card-title">
+              {card.title}
+              <span class="home-card-arrow" aria-hidden="true">→</span>
+            </span>
+            <span class="home-card-index">{card.index}</span>
+          </span>
+
+          <span class="home-card-desc">{card.description}</span>
+        </a>
+      ))
+    }
+  </div>
+</section>
+
+<script>
+  const init = () => {
+    const section = document.getElementById('directory');
+    if (!section || section.dataset.bound === '1') return;
+    section.dataset.bound = '1';
+
+    const cards = [...section.querySelectorAll('.home-card')];
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduced || !('IntersectionObserver' in window)) {
+      cards.forEach((c) => c.classList.add('is-in'));
+      return;
+    }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const el = entry.target;
+        const i = cards.indexOf(el);
+        el.style.animationDelay = `${Math.min(i, 6) * 90}ms`;   // 70–120ms 的 stagger
+        el.classList.add('is-in');
+        io.unobserve(el);
+      });
+    }, { threshold: 0.05 });
+    cards.forEach((c) => io.observe(c));
+
+    // 兜底：视口外的卡片（比如横向滚动的最后一张）绝不能停在不可见状态
+    setTimeout(() => cards.forEach((c) => c.classList.add('is-in')), 1600);
+  };
+
+  init();
+  document.addEventListener('astro:page-load', init);
+</script>

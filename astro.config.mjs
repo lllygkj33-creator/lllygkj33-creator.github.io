@@ -5,6 +5,12 @@ export default defineConfig({
   site: 'https://lllygkj33-creator.github.io',
   // 目录重构前的旧地址，全部转到新地址（部署在 Pages 上是 meta refresh 形式的跳转）
   redirects: {
+    // 首页目录卡片使用栏目根地址（/seo/、/geo/ …），这几个栏目没有 index.md，
+    // 因此在这里落到该栏第一页，保证卡片链接不会 404
+    '/seo/': '/seo/basics/seo-optimization-goals/',
+    '/geo/': '/geo/basics/geo-title-decision-tree/',
+    '/social/': '/social/concepts/overview/',
+    '/google-algorithm/': '/google-algorithm/overview/google-search-algorithm-history/',
     '/brand-entity-audit/overview/': '/brand-entity-audit/',
     '/brand-entity-audit/entity-scope/': '/brand-entity-audit/concepts/entity-scope/',
     '/brand-entity-audit/fact-and-claim/': '/brand-entity-audit/concepts/fact-and-claim/',
