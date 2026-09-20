@@ -661,14 +661,14 @@ html.toc-off .main { max-width: 72rem; }
   padding: 2.5rem 2rem 3rem;
   display: flex;
   flex-direction: column;
-  gap: 2.5rem;
+  gap: 2rem;
 }
 
-.footer-top {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2rem 3rem;
-  justify-content: space-between;
+/* 第 2 行：栏目分四栏，窄屏自动折成两栏 */
+.footer-nav {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 2rem 1.5rem;
 }
 
 .footer-brand {
@@ -703,20 +703,34 @@ html.toc-off .main { max-width: 72rem; }
 .footer-col a { color: var(--dim); }
 .footer-col a:hover { color: var(--text); }
 
+/* 第 3 行：社媒单独一段 */
+.footer-social {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.875rem;
+}
+
+.footer-social p {
+  margin: 0;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.footer-social a { color: var(--dim); }
+.footer-social a:hover { color: var(--text); }
+
+/* 第 4 行：版权条 */
 .footer-bottom {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
   font-size: 0.875rem;
   color: var(--dim);
-}
-
-.footer-links {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
 }
 
 /* 社交图标（页脚 + 正文右上角共用） */
@@ -1568,6 +1582,7 @@ html.toc-off .main { max-width: 72rem; }
 :root[data-theme='dark'] .bae-status[data-s='scope'] { color: #5cc0c9; }
 
 @media (max-width: 700px) {
+  .footer-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.75rem 1.25rem; }
   .bae-compare,
   .bae-split,
   .bae-join { grid-template-columns: minmax(0, 1fr); }

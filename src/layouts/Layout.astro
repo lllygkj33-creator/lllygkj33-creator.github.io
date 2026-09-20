@@ -25,6 +25,14 @@ const {
 } = Astro.props;
 
 const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+
+// 页脚分栏：标题和顺序都在这里定；以后加栏目要同时加进来，否则不会出现在页脚
+const FOOTER_COLS = [
+  ['Search', ['seo', 'geo', 'google-algorithm']],
+  ['Content', ['content-quality', 'skyscraper']],
+  ['Links', ['link-graph', 'link-automation']],
+  ['Brand & Social', ['brand-entity-audit', 'social']],
+];
 // 复制按钮要用的原始 markdown，塞进 JSON script 里（< 转义避免提前闭合）
 const markdown = JSON.stringify(`# ${title}\n\n${body}`).replace(/</g, '\\u003c');
 ---
@@ -141,27 +149,31 @@ const markdown = JSON.stringify(`# ${title}\n\n${body}`).replace(/</g, '\\u003c'
     {!bare && (
       <footer class="footer">
         <div class="footer-in">
-          <div class="footer-top">
-            <div class="footer-brand">
-              <a class="brand" href="/">
-                <img class="brand-logo footer-logo" src="/logo.webp" alt="" width="76" height="30" />
-                <span>Karina Studio</span>
-              </a>
-              <p>SEO / GEO 的方法与记录</p>
-            </div>
+          <div class="footer-brand">
+            <a class="brand" href="/">
+              <img class="brand-logo footer-logo" src="/logo.webp" alt="" width="76" height="30" />
+              <span>Karina Studio</span>
+            </a>
+            <p>SEO / GEO 的方法与记录</p>
+          </div>
 
-            <div class="footer-col">
-              <p>Content</p>
-              {nav.map((s) => <a href={s.url}>{s.label}</a>)}
-            </div>
+          <div class="footer-nav">
+            {FOOTER_COLS.map(([label, ids]) => (
+              <div class="footer-col">
+                <p>{label}</p>
+                {ids.map((id) => nav.find((s) => s.id === id)).filter(Boolean).map((s) => <a href={s.url}>{s.label}</a>)}
+              </div>
+            ))}
+          </div>
+
+          <div class="footer-social">
+            <p>Follow</p>
+            <a href="https://github.com/">GitHub</a>
+            <Social class="social-footer" />
           </div>
 
           <div class="footer-bottom">
             <span>© 2026 Karina Studio</span>
-            <div class="footer-links">
-              <a href="https://github.com/">GitHub</a>
-              <Social class="social-footer" />
-            </div>
           </div>
         </div>
       </footer>
