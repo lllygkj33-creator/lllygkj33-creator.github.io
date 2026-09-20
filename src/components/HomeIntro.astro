@@ -10,11 +10,11 @@ const GHOSTS = ['SEO', 'GEO', 'XEO', 'GOOGLE', 'ALGORITHM', 'CASE', 'SEARCH', 'C
 // [词, 是否斜体]；start/per/exit/pauseBefore/pause 是时间轴（毫秒）。
 const LINES = [
   // 一行一句话，共 5 行；每行切换比上一版慢约 0.3 秒
-  { words: [['SEO.'], ['GEO.'], ['XEO.'], ['In', true], ['Google.']], start: 300, per: 270, pauseBefore: 4, pause: 430, exit: 2650 },
-  { words: [['Google'], ['Algorithms.']], start: 2650, per: 260, exit: 3550 },
-  { words: [['Real'], ['Cases.']], start: 3550, per: 250, exit: 4450 },
-  { words: [['All'], ['Things'], ['You'], ['Wanna'], ['Know.']], start: 4450, per: 340, exit: 6750 },
-  { words: [['At'], ['Karina', true], ['Studio', true]], start: 6750, per: 290, last: true },
+  { words: ['SEO.', 'GEO.', 'XEO.', 'In', 'Google.'], start: 300, per: 270, pauseBefore: 4, pause: 430, exit: 2650 },
+  { words: ['Google', 'Algorithms.'], start: 2650, per: 260, exit: 3550 },
+  { words: ['Real', 'Cases.'], start: 3550, per: 250, exit: 4450 },
+  { words: ['All', 'Things', 'You', 'Wanna', 'Know.'], start: 4450, per: 340, exit: 6750 },
+  { words: ['At', 'Karina', 'Studio'], start: 6750, per: 290, last: true },
 ];
 const LAST_STATIC = 'At Karina Studio';
 ---
@@ -38,7 +38,7 @@ const LAST_STATIC = 'At Karina Studio';
             data-pause={line.pause ?? ''}
             data-static={line.last ? '1' : (line.start === 300 ? '1' : undefined)}
           >
-            {line.words.map(([text, em]) => <span class:list={['w', em && 'em']}>{text}</span>)}
+            {line.words.map((text) => <span class="w">{text}</span>)}
           </p>
         ))}
       </div>

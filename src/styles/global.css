@@ -1759,9 +1759,8 @@ html.intro-on .home-intro { display: flex; align-items: center; justify-content:
   clip-path: inset(-0.4em 100% -0.4em 0);
   will-change: clip-path;
 }
-.intro-line .w { display: inline-block; }
-/* 斜体词用真正的 Fraunces italic（不是浏览器伪斜） */
-.intro-line .w.em {
+.intro-line .w {
+  display: inline-block;
   font-family: var(--display);
   font-style: italic;
   font-synthesis: none;
