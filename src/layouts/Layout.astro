@@ -19,6 +19,7 @@ const {
   prev,
   next,
   intro = false,
+  compose = false,
 } = Astro.props;
 
 const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
@@ -65,13 +66,13 @@ const markdown = JSON.stringify(`# ${title}\n\n${body}`).replace(/</g, '\\u003c'
     {intro && <HomeIntro />}
     <Topbar nav={nav} activeSection={activeSection} />
 
-    <div class="layout">
-      <Sidebar groups={groups} current={current} />
+    <div class:list={['layout', compose && 'layout-compose']}>
+      {!compose && <Sidebar groups={groups} current={current} />}
 
-      <main class="main">
-        {sectionLabel && <div class="eyebrow">{sectionLabel}</div>}
+      <main class:list={['main', compose && 'main-compose']}>
+        {!compose && sectionLabel && <div class="eyebrow">{sectionLabel}</div>}
 
-        <div class="head-row">
+        {!compose && (<div class="head-row">
           <h1>{title}</h1>
           <button class="copy-btn" id="copy-md" type="button">
             <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -85,11 +86,11 @@ const markdown = JSON.stringify(`# ${title}\n\n${body}`).replace(/</g, '\\u003c'
           </button>
 
           <Social class="social-inline" />
-        </div>
+        </div>)}
 
         <div class="prose"><slot /></div>
 
-        {(prev || next) && (
+        {(prev || next) && !compose && (
           <nav class="pager">
             {prev && (
               <a href={prev.url}>
@@ -112,7 +113,7 @@ const markdown = JSON.stringify(`# ${title}\n\n${body}`).replace(/</g, '\\u003c'
 
       </main>
 
-      {toc.length > 0 && (
+      {!compose && toc.length > 0 && (
         <aside class="toc">
           <button class="toc-toggle" id="toc-toggle" type="button" aria-expanded="true" aria-controls="toc-list">
             <svg width="13" height="13" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
@@ -161,7 +162,7 @@ const markdown = JSON.stringify(`# ${title}\n\n${body}`).replace(/</g, '\\u003c'
       </div>
     </footer>
 
-    <script type="application/json" id="page-md" set:html={markdown} />
+    {!compose && <script type="application/json" id="page-md" set:html={markdown} />}
 
     <script>
       // 站点启用了客户端路由（ClientRouter）：换页不重载整页，

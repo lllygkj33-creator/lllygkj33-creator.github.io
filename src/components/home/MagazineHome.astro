@@ -1,0 +1,360 @@
+---
+// 首页（动画结束后的那一页）：杂志封面式滚动叙事
+//   01 封面（深酒红 + 橙色 + 艺术斜体大字）02 目录 03 三个问题 04 大字引言 05 进入知识库
+// 每屏 100svh；向下滚动时用"橙色揭页幕"过渡（与开场第二幕同一质感），
+// 屏与屏之间的色调变化被藏在转场里。
+import { getNav } from '../../lib/nav';
+
+const nav = await getNav();
+const issues = nav.map((s, i) => ({
+  no: String(i + 1).padStart(2, '0'),
+  label: s.label,
+  url: s.url,
+}));
+
+const COVER_LINES = [
+  ['Google Algorithms', '排序到底在奖励什么，以及它怎么变'],
+  ['GEO', '让答案被机器引用，而不只是被人读到'],
+  ['XEO', '社媒信号如何扩散，再回流成搜索需求'],
+];
+---
+
+<div class="mag" id="mag">
+  <!-- 01 封面 -->
+  <section class="mag-spread mag-cover" data-spread="1">
+    <div class="mag-rail" aria-hidden="true">
+      <span>Karina Studio</span>
+      <span>Issue 01</span>
+      <span>2026</span>
+    </div>
+
+    <div class="mag-inner">
+      <p class="mag-kicker">SEO / GEO / XEO — Knowledge System</p>
+
+      <h1 class="mag-title">
+        <span class="l1">Karina</span>
+        <span class="l2">Studio</span>
+      </h1>
+
+      <ul class="mag-lines">
+        {COVER_LINES.map(([name, desc]) => (
+          <li><b>{name}</b><span>{desc}</span></li>
+        ))}
+      </ul>
+
+      <p class="mag-scroll" aria-hidden="true">往下滚动 ↓</p>
+    </div>
+  </section>
+
+  <!-- 02 目录 -->
+  <section class="mag-spread" data-spread="2">
+    <div class="mag-inner">
+      <h2 class="mag-h2">Contents</h2>
+      <p class="mag-lede">每一栏都是可以独立读完的系列，不用按顺序。</p>
+
+      <ol class="mag-index">
+        {issues.map((s) => (
+          <li>
+            <a href={s.url}>
+              <span class="mag-no">{s.no}</span>
+              <span class="mag-label">{s.label}</span>
+              <span class="mag-arrow" aria-hidden="true">→</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- 03 三个问题 -->
+  <section class="mag-spread" data-spread="3">
+    <div class="mag-inner">
+      <h2 class="mag-h2">三个问题</h2>
+      <p class="mag-lede">搜索、生成、社媒看起来是三件事，实际是同一件事的三个入口。</p>
+
+      <div class="mag-cols">
+        <article>
+          <span class="mag-no">01</span>
+          <h3>搜索</h3>
+          <p>被搜到的前提是页面真的在回答某个具体问题，而不是在重复关键词。</p>
+        </article>
+        <article>
+          <span class="mag-no">02</span>
+          <h3>生成</h3>
+          <p>被引用要求段落能独立成立：口径清楚、来源可核、边界写明白。</p>
+        </article>
+        <article>
+          <span class="mag-no">03</span>
+          <h3>社媒</h3>
+          <p>平台上的问题先于选题出现，把它们收回来才有一手语言和真实需求。</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 大字引言 -->
+  <section class="mag-spread mag-pull" data-spread="4">
+    <div class="mag-inner">
+      <blockquote>
+        <p class="mag-quote">Read first.<br />Quoted second.</p>
+        <footer>先被读懂，才被引用。检索与生成，最后都回到同一件事：内容本身是否成立。</footer>
+      </blockquote>
+    </div>
+  </section>
+
+  <!-- 05 进入知识库 -->
+  <section class="mag-spread" data-spread="5">
+    <div class="mag-inner">
+      <h2 class="mag-h2">Enter</h2>
+      <p class="mag-lede">从任意一栏开始，深的那一页永远在文档里。</p>
+
+      <ul class="mag-enter">
+        {issues.map((s) => (
+          <li><a href={s.url}>{s.label}<span aria-hidden="true">→</span></a></li>
+        ))}
+      </ul>
+
+      <p class="mag-colophon">Karina Studio · Issue 01 · 2026</p>
+    </div>
+  </section>
+</div>
+
+<style>
+  .mag {
+    --mag-accent: #ff4813;
+    --mag-cover-bg: #220301;
+    --mag-cover-ink: #ffe2d8;
+    background: var(--bg);
+  }
+
+  .mag-spread {
+    position: relative;
+    min-height: 100vh;
+    min-height: 100svh;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    scroll-snap-align: start;
+  }
+
+  /* 橙色揭页幕：进入这一屏时向上划走，色调切换藏在里面 */
+  .mag-spread::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    background: var(--mag-accent);
+    clip-path: inset(0 0 0 0);
+  }
+  .mag-spread.is-in::before {
+    clip-path: inset(0 0 100% 0);
+    transition: clip-path 880ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .mag-inner {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 76rem;
+    padding: 5.5rem 2.5rem;
+  }
+  .mag-spread > .mag-inner {
+    opacity: 0;
+    transform: translateY(26px);
+    transition: opacity 620ms ease, transform 880ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .mag-spread.is-in > .mag-inner { opacity: 1; transform: none; }
+
+  /* ── 封面 ── */
+  .mag-cover { background: var(--mag-cover-bg); color: var(--mag-cover-ink); }
+  .mag-cover .mag-inner { max-width: 82rem; }
+  .mag-kicker {
+    margin: 0 0 2.5rem;
+    font-size: 0.6875rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    opacity: 0.62;
+  }
+  .mag-title {
+    margin: 0;
+    font-family: var(--display);
+    font-style: italic;
+    font-synthesis: none;
+    font-weight: 400;
+    font-size: clamp(3.4rem, 16vw, 15rem);
+    line-height: 0.84;
+    letter-spacing: -0.035em;
+    will-change: transform;
+  }
+  .mag-title .l1 { display: block; }
+  .mag-title .l2 { display: block; padding-left: 14%; font-weight: 300; }
+  .mag-lines { list-style: none; margin: 3rem 0 0; padding: 0; max-width: 42rem; }
+  .mag-lines li {
+    display: flex;
+    gap: 1rem;
+    align-items: baseline;
+    padding: 0.75rem 0;
+    border-top: 1px solid rgba(255, 226, 216, 0.18);
+    font-size: 0.875rem;
+  }
+  .mag-lines b { flex: none; color: var(--mag-accent); font-weight: 600; letter-spacing: 0.02em; }
+  .mag-lines span { opacity: 0.72; }
+  .mag-scroll {
+    position: absolute;
+    left: 2.5rem;
+    bottom: 2rem;
+    margin: 0;
+    font-size: 0.6875rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    opacity: 0.45;
+  }
+  .mag-rail {
+    position: absolute;
+    right: 1.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    display: flex;
+    gap: 1.1rem;
+    writing-mode: vertical-rl;
+    font-size: 0.625rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    opacity: 0.45;
+  }
+
+  /* ── 通用排版 ── */
+  .mag-h2 {
+    margin: 0;
+    font-family: var(--display);
+    font-style: italic;
+    font-synthesis: none;
+    font-weight: 400;
+    font-size: clamp(2.4rem, 6vw, 5rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .mag-lede { margin: 1rem 0 2.75rem; max-width: 34rem; font-size: 0.9375rem; opacity: 0.72; }
+  .mag-no {
+    font-family: var(--display);
+    font-style: italic;
+    font-synthesis: none;
+    font-size: clamp(1.5rem, 2.6vw, 2.4rem);
+    opacity: 0.45;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .mag-index, .mag-enter { list-style: none; margin: 0; padding: 0; }
+  .mag-index { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 3rem; }
+  .mag-index li { border-top: 1px solid var(--border); }
+  .mag-index a {
+    display: flex;
+    align-items: baseline;
+    gap: 1.25rem;
+    padding: 0.85rem 0;
+    transition: padding 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .mag-index a:hover { padding-left: 0.6rem; }
+  .mag-label { flex: 1; font-size: clamp(1rem, 1.6vw, 1.25rem); font-weight: 600; }
+  .mag-arrow { opacity: 0; transform: translateX(-4px); transition: opacity 240ms ease, transform 240ms ease; }
+  .mag-index a:hover .mag-arrow { opacity: 0.7; transform: none; }
+
+  .mag-index { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mag-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2.5rem; }
+  .mag-cols h3 { margin: 0.35rem 0 0.6rem; font-size: 1rem; font-weight: 600; letter-spacing: 0.02em; }
+  .mag-cols p { margin: 0; font-size: 0.875rem; opacity: 0.72; }
+
+  .mag-pull { background: var(--code-bg); }
+  .mag-pull blockquote { margin: 0; }
+  .mag-quote {
+    margin: 0;
+    font-family: var(--display);
+    font-style: italic;
+    font-synthesis: none;
+    font-weight: 400;
+    font-size: clamp(2.2rem, 7vw, 6rem);
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+  }
+  .mag-pull footer { margin-top: 1.75rem; max-width: 32rem; font-size: 0.9375rem; opacity: 0.7; }
+
+  .mag-enter { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 3rem; }
+  .mag-enter a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.5rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 0.875rem;
+    transition: border-color 240ms ease, transform 240ms ease;
+  }
+  .mag-enter a:hover { border-color: var(--ring-hover); transform: translateY(-1px); }
+  .mag-enter a span { opacity: 0.5; }
+  .mag-colophon { font-size: 0.75rem; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.45; }
+
+  @media (max-width: 900px) {
+    .mag-inner { padding: 4rem 1.5rem; }
+    .mag-cols { grid-template-columns: minmax(0, 1fr); gap: 1.75rem; }
+    .mag-index { grid-template-columns: minmax(0, 1fr); }
+    .mag-rail { display: none; }
+    .mag-scroll { left: 1.5rem; }
+    .mag-title .l2 { padding-left: 8%; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mag-spread::before { display: none; }
+    .mag-spread > .mag-inner { opacity: 1; transform: none; transition: none; }
+    .mag-index a, .mag-enter a { transition: none; }
+  }
+</style>
+
+<script>
+  const init = () => {
+    const mag = document.getElementById('mag');
+    const root = document.documentElement;
+    if (!mag) { root.classList.remove('mag-snap', 'mag-home'); return; }
+
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const spreads = [...mag.querySelectorAll('.mag-spread')];
+
+    if (reduced) {
+      spreads.forEach((s) => s.classList.add('is-in'));
+    } else {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return;
+          e.target.classList.add('is-in');
+          io.unobserve(e.target);
+        });
+      }, { threshold: 0.28 });
+      spreads.forEach((s) => io.observe(s));
+
+      const paras = [...mag.querySelectorAll('.mag-title, .mag-quote')];
+      let ticking = false;
+      const onScroll = () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+          const vh = window.innerHeight;
+          paras.forEach((el) => {
+            const r = el.getBoundingClientRect();
+            const p = (r.top + r.height / 2 - vh / 2) / vh;
+            const shift = Math.max(-1, Math.min(1, p)) * -22;
+            el.style.transform = `translate3d(0, ${shift.toFixed(1)}px, 0)`;
+          });
+          ticking = false;
+        });
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    }
+
+    root.classList.add('mag-snap', 'mag-home');
+  };
+
+  init();
+  document.addEventListener('astro:page-load', init);
+</script>
