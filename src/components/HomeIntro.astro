@@ -1,0 +1,142 @@
+---
+// 首页开场：电影字幕式 Intro（仅首页渲染）
+// 是否播放由 sessionStorage 决定；首帧是否覆盖由 <head> 内联脚本加上 html.intro-on 控制，
+// 所以不会出现"先闪一下首页、Intro 再出现"。整段只用 CSS + Web Animations API，无第三方依赖。
+const GHOSTS = ['SEO', 'GEO', 'CONTENT', 'LINKS', 'ENTITIES', 'KNOWLEDGE', 'SYSTEMS', 'SEARCH', 'STRUCTURE'];
+---
+
+<div id="home-intro" class="home-intro" role="dialog" aria-label="网站开场">
+  <div class="intro-ghosts" aria-hidden="true">
+    {GHOSTS.map((word) => <span>{word}</span>)}
+  </div>
+
+  <div class="intro-center">
+    <p class="intro-caption-wrap" aria-hidden="true">
+      <span class="intro-caption" id="intro-caption"></span>
+    </p>
+
+    <button class="intro-enter" id="intro-enter" type="button" hidden>ENTER →</button>
+
+    <p class="visually-hidden">J Min. — 个人知识库：SEO / GEO / 内容系统 / 链接系统 / 实体知识系统</p>
+  </div>
+
+  <button class="intro-skip" id="intro-skip" type="button">Skip</button>
+</div>
+
+<script>
+  const KEY = 'homepage_intro_seen';
+  const LINES = [
+    'Search. In Context.',
+    'Content. In Systems.',
+    'Entities. In Sync.',
+    'Links. In Structure.',
+    'Answers. In Motion.',
+    'Knowledge. Connected.',
+  ];
+  const LAST = 'J Min.';
+
+  const EASE_IN = 'cubic-bezier(.22, 1, .36, 1)';    // 快速响应、柔和收尾
+  const EASE_OUT = 'cubic-bezier(.4, 0, 1, 1)';      // 退出更干脆
+  const ENTER_KF = [
+    { opacity: 0, transform: 'translateY(22px) scale(.97)', filter: 'blur(6px)' },
+    { opacity: 1, transform: 'translateY(0) scale(1)', filter: 'blur(0)' },
+  ];
+  const EXIT_KF = [
+    { opacity: 1, transform: 'translateY(0) scale(1)', filter: 'blur(0)' },
+    { opacity: 0, transform: 'translateY(-16px) scale(1.02)', filter: 'blur(4px)' },
+  ];
+
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+  const isSeen = () => {
+    try { return sessionStorage.getItem(KEY) === '1'; } catch { return false; }
+  };
+  const markSeen = () => {
+    try { sessionStorage.setItem(KEY, '1'); } catch { /* 隐私模式下忽略 */ }
+  };
+
+  let sequenceRunning = false;
+
+  // 幕布揭开：Intro 向上收起，首页同时淡入，不是"动画播完再跳转"
+  const reveal = (intro, root, instant) => {
+    const homeEls = [document.querySelector('.layout'), document.querySelector('.footer')].filter(Boolean);
+    const homeAnim = homeEls.map((el) => el.animate(
+      [{ opacity: 0, transform: 'translateY(12px)' }, { opacity: 1, transform: 'translateY(0)' }],
+      { duration: instant ? 200 : 650, delay: instant ? 0 : 120, easing: EASE_IN, fill: 'forwards' },
+    ));
+    const curtain = intro.animate(
+      [{ clipPath: 'inset(0 0 0 0)' }, { clipPath: 'inset(0 0 100% 0)' }],
+      { duration: instant ? 200 : 700, easing: EASE_IN, fill: 'forwards' },
+    );
+    curtain.finished.then(() => {
+      intro.dataset.done = '1';
+      intro.hidden = true;
+      root.classList.remove('intro-on');
+      // 交还给样式表：动画结束后清掉 fill，避免长期持有效果层
+      homeAnim.forEach((a) => a.cancel());
+      curtain.cancel();
+    });
+  };
+
+  const run = async (intro, root, reduced) => {
+    if (sequenceRunning) return;
+    sequenceRunning = true;
+    intro.dataset.started = '1';      // 告诉兜底脚本"序列活着"，不要放行
+
+    const caption = intro.querySelector('#intro-caption');
+    const enter = intro.querySelector('#intro-enter');
+    const skip = intro.querySelector('#intro-skip');
+
+    const finish = () => {
+      if (!document.body.contains(intro) || intro.dataset.done === '1') return;   // 已经离开首页就别动新页面
+      markSeen();
+      reveal(intro, root, reduced);
+    };
+    enter.addEventListener('click', finish);
+    skip.addEventListener('click', finish);
+
+    // 减少动效：不播连续字幕，直接给静态末帧 + 简单淡出
+    if (reduced) {
+      caption.classList.add('intro-caption-multi');
+      caption.innerHTML = `<span>Knowledge. Connected.</span><span class="is-last">${LAST}</span>`;
+      caption.style.opacity = '1';
+      enter.hidden = false;
+      enter.dataset.on = '1';
+      return;
+    }
+
+    // 字幕：整句进入 → 停留 → 快速退出，下一句继续（每句约 0.85 秒）
+    for (let i = 0; i < LINES.length; i++) {
+      caption.textContent = LINES[i];
+      await caption.animate(ENTER_KF, { duration: 300, easing: EASE_IN, fill: 'both' }).finished;
+      await sleep(340);
+      await caption.animate(EXIT_KF, { duration: 200, easing: EASE_OUT, fill: 'both' }).finished;
+    }
+
+    // 最后一幕：J Min. 停住不退出，然后出现 ENTER 等用户点击
+    caption.textContent = LAST;
+    caption.classList.add('is-last');
+    await caption.animate(ENTER_KF, { duration: 340, easing: EASE_IN, fill: 'both' }).finished;
+    await sleep(620);
+    enter.hidden = false;
+    requestAnimationFrame(() => { enter.dataset.on = '1'; });
+  };
+
+  const init = () => {
+    const intro = document.getElementById('home-intro');
+    const root = document.documentElement;
+    if (!intro) { root.classList.remove('intro-on'); return; }   // 内页：不留残余状态
+    if (intro.dataset.done === '1') return;
+
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (isSeen()) {                                              // 本 session 看过：直接收掉
+      intro.hidden = true;
+      root.classList.remove('intro-on');
+      return;
+    }
+    root.classList.add('intro-on');                              // 首次由 <head> 加过；SPA 回首页时在这里补
+    run(intro, root, reduced);
+  };
+
+  init();
+  document.addEventListener('astro:page-load', init);
+</script>

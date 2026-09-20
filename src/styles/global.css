@@ -1651,3 +1651,149 @@ html.toc-off .main { max-width: 72rem; }
 :root[data-theme='dark'] .la-score-fill { background: #5cc27e; }
 :root[data-theme='dark'] .la-score[data-tone='weak'] .la-score-fill { background: #e0a35c; }
 :root[data-theme='dark'] .la-score[data-tone='low'] .la-score-fill { background: #e07a70; }
+
+/* ── 首页开场：电影字幕式 Intro（仅首页渲染，整页覆盖）────────────────────
+   html.intro-on   由 <head> 内联脚本在首帧前加上 → 不会先闪一下首页
+   .home-intro     深酒红全屏层：Ghost Words + 中央字幕 + ENTER / Skip
+   .intro-reveal   clip-path 幕布向上揭开，同时首页 12px 淡入
+   ------------------------------------------------------------------ */
+html.intro-on { overflow: hidden; }
+html.intro-on .layout,
+html.intro-on .footer { opacity: 0; }
+
+.home-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: none;
+  overflow: hidden;
+  background: #240502;
+  color: #f4e8df;
+  will-change: clip-path;
+}
+html.intro-on .home-intro { display: flex; align-items: center; justify-content: center; }
+.home-intro[hidden] { display: none !important; }
+
+.intro-ghosts {
+  position: absolute;
+  inset: 0;
+  transform: rotate(-24deg) scale(1.35);
+  pointer-events: none;
+  user-select: none;
+}
+.intro-ghosts span {
+  position: absolute;
+  font-size: clamp(1.5rem, 3vw, 3.5rem);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #f4e8df;
+  opacity: 0.05;
+  white-space: nowrap;
+  animation: intro-drift-a 11s ease-in-out infinite alternate;
+}
+.intro-ghosts span:nth-child(1) { top: 14%; left: 6%; animation-duration: 9s; }
+.intro-ghosts span:nth-child(2) { top: 12%; right: 8%; animation-name: intro-drift-b; animation-duration: 13s; }
+.intro-ghosts span:nth-child(3) { bottom: 16%; left: 10%; animation-name: intro-drift-c; animation-duration: 14s; }
+.intro-ghosts span:nth-child(4) { top: 48%; right: 4%; animation-duration: 10s; }
+.intro-ghosts span:nth-child(5) { bottom: 12%; right: 14%; animation-name: intro-drift-b; animation-duration: 12s; }
+.intro-ghosts span:nth-child(6) { top: 44%; left: 2%; animation-name: intro-drift-c; animation-duration: 11s; }
+.intro-ghosts span:nth-child(7) { bottom: 30%; right: 30%; animation-name: intro-drift-b; animation-duration: 14s; opacity: 0.04; }
+.intro-ghosts span:nth-child(8) { top: 28%; left: 32%; animation-duration: 13s; opacity: 0.035; }
+.intro-ghosts span:nth-child(9) { bottom: 6%; left: 42%; animation-name: intro-drift-c; animation-duration: 10s; opacity: 0.045; }
+
+@keyframes intro-drift-a {
+  from { transform: translate3d(0, 0, 0); opacity: 0.05; }
+  to { transform: translate3d(38px, -24px, 0); opacity: 0.065; }
+}
+@keyframes intro-drift-b {
+  from { transform: translate3d(0, 0, 0); opacity: 0.055; }
+  to { transform: translate3d(-46px, 28px, 0); opacity: 0.04; }
+}
+@keyframes intro-drift-c {
+  from { transform: translate3d(0, 0, 0); opacity: 0.045; }
+  to { transform: translate3d(26px, 40px, 0); opacity: 0.06; }
+}
+
+.intro-center {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 24px;
+  text-align: center;
+}
+.intro-caption-wrap {
+  display: grid;
+  place-items: center;
+  min-height: 1.3em;
+}
+.intro-caption {
+  font-size: clamp(2.2rem, 4.2vw, 4.8rem);
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+  opacity: 0;
+}
+.intro-caption.is-last { font-weight: 500; }
+.intro-caption-multi { display: flex; flex-direction: column; gap: 0.35em; }
+
+.intro-enter {
+  margin-top: 2.4rem;
+  padding: 0.35rem 0.6rem;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: clamp(0.85rem, 1vw, 1rem);
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 420ms ease;
+}
+.intro-enter[data-on='1'] { opacity: 0.85; }
+.intro-enter:hover,
+.intro-enter:focus-visible { opacity: 1; }
+.intro-enter:focus-visible { outline: 1px solid currentColor; outline-offset: 4px; }
+
+.intro-skip {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.75rem;
+  z-index: 3;
+  padding: 0.25rem 0.4rem;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 0.8125rem;
+  letter-spacing: 0.06em;
+  opacity: 0.5;
+  cursor: pointer;
+}
+.intro-skip:hover,
+.intro-skip:focus-visible { opacity: 0.9; }
+.intro-skip:focus-visible { outline: 1px solid currentColor; outline-offset: 3px; }
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 700px) {
+  .intro-caption { font-size: clamp(2rem, 10vw, 3.4rem); }
+  .intro-ghosts span:nth-child(n + 4) { display: none; }   /* 移动端只留 3 个 Ghost */
+  .intro-skip { top: 1rem; right: 1rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro-ghosts span { animation: none; }
+  .intro-enter { transition: none; }
+}
