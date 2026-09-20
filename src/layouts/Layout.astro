@@ -1,6 +1,7 @@
 ---
 import { ClientRouter } from 'astro:transitions';
 import Topbar from '../components/Topbar.astro';
+import PageWipe from '../components/PageWipe.astro';
 import Sidebar from '../components/Sidebar.astro';
 import Social from '../components/Social.astro';
 import HomeIntro from '../components/HomeIntro.astro';
@@ -64,6 +65,7 @@ const markdown = JSON.stringify(`# ${title}\n\n${body}`).replace(/</g, '\\u003c'
     )}
   </head>
   <body>
+    <PageWipe />
     {intro && <HomeIntro />}
     {!bare && <Topbar nav={nav} activeSection={activeSection} />}
 

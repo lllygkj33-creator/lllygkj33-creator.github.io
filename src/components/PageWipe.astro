@@ -1,0 +1,47 @@
+---
+// 橙色转场幕布：跨页存活（transition:persist），所以能在"换页瞬间"继续动作。
+// 流程：首页点目录 → 幕布从下往上盖满 → navigate() 换页 → 新页面就位后幕布继续向上揭走。
+// 只从首页的引导链接触发；内页之间的普通导航不受影响。
+---
+
+<div class="pagewipe" id="pagewipe" transition:persist aria-hidden="true"></div>
+
+<style>
+  .pagewipe {
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    background: var(--wipe, #ff4813);
+    transform: translateY(101%);
+    transition: transform 640ms cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
+  }
+  .pagewipe.is-cover { transform: translateY(0); }
+  .pagewipe.is-lift { transform: translateY(-101%); transition-duration: 780ms; }
+  .pagewipe.no-anim { transition: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pagewipe { display: none; }
+  }
+</style>
+
+<script>
+  const init = () => {
+    const el = document.getElementById('pagewipe');
+    if (!el) return;
+
+    // 带着幕布落地：新页面已就位，把幕布继续向上揭走，然后悄悄归位
+    if (el.classList.contains('is-cover')) {
+      el.classList.remove('is-cover');
+      el.classList.add('is-lift');
+      window.setTimeout(() => {
+        el.classList.add('no-anim');
+        el.classList.remove('is-lift');
+        requestAnimationFrame(() => requestAnimationFrame(() => el.classList.remove('no-anim')));
+      }, 800);
+    }
+  };
+
+  init();
+  document.addEventListener('astro:page-load', init);
+</script>

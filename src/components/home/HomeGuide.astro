@@ -12,7 +12,7 @@ const nav = await getNav();
 // video : 该屏的背景视频（放 public/media/home/，留空则用纯色）
 // scrim : 压在视频上的同色系叠色罩，让视频吃进这一屏的颜色并保证文字可读
 const PALETTE = [
-  { bg: '#2b0705', video: '/media/home/seo.mp4' },
+  { bg: '#2b0705', video: '/media/home/seo.mp4', wipe: '#ff4813' },
   { bg: '#efe3cf', video: '/media/home/geo.mp4' },
   { bg: '#0e6f6b', video: '/media/home/social.mp4' },
   { bg: '#14161a', video: '/media/home/google-algorithm.mp4' },
@@ -20,7 +20,7 @@ const PALETTE = [
   { bg: '#2f3d24', video: '/media/home/skyscraper.mp4' },
   { bg: '#26364f', video: '/media/home/link-graph.mp4' },
   { bg: '#3b1d33', video: '/media/home/brand-entity-audit.mp4' },
-  { bg: '#ff4813', video: '/media/home/link-automation.mp4' },
+  { bg: '#ff4813', video: '/media/home/link-automation.mp4', wipe: '#2b0705' },   // 橙底屏用深酒红幕布
 ];
 
 // 判断底色深浅：浅色底上白字读不出来，自动压一层暗罩
@@ -105,6 +105,7 @@ const panels = nav.slice(0, PALETTE.length).map((section, i) => {
   return {
     section,
     color: PALETTE[i],
+    wipe: PALETTE[i].wipe,
     entries,
     no: String(i + 1).padStart(2, '0'),
     titleEn: SECTION_EN[section.id] || section.label,
@@ -123,6 +124,7 @@ const total = panels.length;
         style={`--bg:${color.bg}; --ink:${color.ink}; --accent:${color.accent};${color.scrim ? ` --scrim:${color.scrim};` : ''}`}
         data-panel={no}
         data-video={color.video ? '1' : undefined}
+        data-wipe={color.wipe}
       >
         <div class="gpanel-stage">
           {textScrim && <span class="gpanel-textscrim" style={`background:${textScrim}`} aria-hidden="true" />}
@@ -325,6 +327,34 @@ const total = panels.length;
 <script>
   const init = () => {
     const guide = document.getElementById('guide');
+    // 从首页进入文档：橙色幕布盖满 → 换页 → 新页面就位后幕布揭走（V2 的手感）
+    if (guide && guide.dataset.wipeBound !== '1') {
+      guide.dataset.wipeBound = '1';
+      guide.addEventListener('click', (event) => {
+        const link = event.target.closest('a[href^="/"]');
+        if (!link) return;
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        const wipe = document.getElementById('pagewipe');
+        if (!wipe) return;
+
+        event.preventDefault();
+        const panel = link.closest('.gpanel');
+        wipe.style.setProperty('--wipe', panel?.dataset.wipe || '#ff4813');
+        wipe.classList.remove('no-anim');
+        wipe.classList.add('is-cover');
+
+        const href = link.getAttribute('href');
+        window.setTimeout(async () => {
+          try {
+            const { navigate } = await import('astro:transitions/client');
+            navigate(href);
+          } catch {
+            location.href = href;      // 路由不可用时退化为整页跳转
+          }
+        }, 660);
+      });
+    }
     if (!guide) { document.documentElement.classList.remove('guide-home'); return; }
     document.documentElement.classList.add('guide-home');   // 首页隐藏右侧滚动条
 
