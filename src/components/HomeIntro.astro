@@ -5,6 +5,17 @@
 // 是否播放由 sessionStorage 决定；首帧是否覆盖由 <head> 内联脚本加上 html.intro-on 控制。
 // 只用 CSS + Web Animations API，无第三方动画库。
 const GHOSTS = ['SEO', 'GEO', 'XEO', 'GOOGLE', 'ALGORITHM', 'CASE', 'SEARCH', 'CONTENT', 'KARINA'];
+
+// 第一幕文案：每个词是一个 span，整句预排好，用遮罩从左往右扫过去（不是打字机、不改 DOM 文本）。
+// [词, 是否斜体]；start/per/exit/pauseBefore/pause 是时间轴（毫秒）。
+const LINES = [
+  { words: [['SEO.'], ['GEO.'], ['XEO.'], ['In', true], ['Google.']], start: 300, per: 240, pauseBefore: 4, pause: 380, exit: 2300 },
+  { words: [['Google'], ['Algorithms.']], start: 2300, per: 220, exit: 3050 },
+  { words: [['Real'], ['Cases.']], start: 3050, per: 210, exit: 3750 },
+  { words: [['All'], ['Things'], ['You'], ['Wanna'], ['Know.']], start: 3750, per: 300, exit: 5550 },
+  { words: [['At'], ['Karina', true], ['Studio', true]], start: 5550, per: 240, last: true },
+];
+const LAST_STATIC = 'At Karina Studio';
 ---
 
 <div id="home-intro" class="home-intro" role="dialog" aria-label="网站开场">
@@ -15,11 +26,23 @@ const GHOSTS = ['SEO', 'GEO', 'XEO', 'GOOGLE', 'ALGORITHM', 'CASE', 'SEARCH', 'C
     </div>
 
     <div class="intro-center">
-      <p class="intro-caption-wrap" aria-hidden="true">
-        <span class="intro-caption" id="intro-caption"></span>
-      </p>
+      <div class="intro-tagline" id="intro-tagline" aria-hidden="true">
+        {LINES.map((line) => (
+          <p
+            class="intro-line"
+            data-start={line.start}
+            data-per={line.per}
+            data-exit={line.exit ?? ''}
+            data-pause-before={line.pauseBefore ?? ''}
+            data-pause={line.pause ?? ''}
+            data-static={line.last ? '1' : (line.start === 300 ? '1' : undefined)}
+          >
+            {line.words.map(([text, em]) => <span class:list={['w', em && 'em']}>{text}</span>)}
+          </p>
+        ))}
+      </div>
 
-      <button class="intro-enter" id="intro-enter" type="button" hidden>GO →</button>
+      <button class="intro-enter" id="intro-enter" type="button" hidden>Lets Go →</button>
 
       <p class="visually-hidden">Karina Studio — SEO / GEO / XEO、Google 算法、真实案例</p>
     </div>
@@ -40,14 +63,6 @@ const GHOSTS = ['SEO', 'GEO', 'XEO', 'GOOGLE', 'ALGORITHM', 'CASE', 'SEARCH', 'C
 <script>
   const KEY = 'homepage_intro_seen';
 
-  // 第一幕：正式文案（不要扩写）
-  const LINES = [
-    'SEO. GEO. XEO. In Google.',
-    'Google Algorithms.',
-    'Real Cases.',
-    'All Things You Wanna Know.',
-  ];
-  const LAST_LINE = 'At Karina.';
 
   const EASE_IN = 'cubic-bezier(.22, 1, .36, 1)';
   const EASE_OUT = 'cubic-bezier(.4, 0, 1, 1)';
@@ -99,7 +114,7 @@ const GHOSTS = ['SEO', 'GEO', 'XEO', 'GOOGLE', 'ALGORITHM', 'CASE', 'SEARCH', 'C
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const stageOne = intro.querySelector('#intro-stage-one');
     const stageTwo = intro.querySelector('#intro-stage-two');
-    const caption = intro.querySelector('#intro-caption');
+    const tagline = intro.querySelector('#intro-tagline');
     const go = intro.querySelector('#intro-enter');
     const skip = intro.querySelector('#intro-skip');
     const typeWrap = intro.querySelector('#karina-type');
@@ -213,9 +228,8 @@ const GHOSTS = ['SEO', 'GEO', 'XEO', 'GOOGLE', 'ALGORITHM', 'CASE', 'SEARCH', 'C
     // 减少动效：静态两行 + GO；点击后静态品牌名短暂停留，再淡出
     const reducedRun = () => {
       phase = 'stage1';
-      caption.classList.add('intro-caption-multi');
-      caption.innerHTML = '<span>SEO. GEO. XEO.</span><span class="is-last">At Karina.</span>';
-      caption.style.opacity = '1';
+      tagline.classList.add('is-static');
+      tagline.style.opacity = '1';
       go.hidden = false;
       go.dataset.on = '1';
       phase = 'waiting-go';
@@ -232,20 +246,59 @@ const GHOSTS = ['SEO', 'GEO', 'XEO', 'GOOGLE', 'ALGORITHM', 'CASE', 'SEARCH', 'C
       });
     };
 
+    // 第一幕：整句预排好，遮罩从左往右扫过；每个词到达前留一小段"坡"，
+    // 观感是一个词一个词出现，但 DOM 完全不改（无重排、无打字机）。
     const stageOneRun = async () => {
       phase = 'stage1';
-      for (const line of LINES) {
-        caption.textContent = line;
-        await play(caption, ENTER_KF, { duration: 340, easing: EASE_IN, fill: 'both' }).finished.catch(() => {});
-        await sleep(380);
-        await play(caption, EXIT_KF, { duration: 230, easing: EASE_OUT, fill: 'both' }).finished.catch(() => {});
-      }
-      if (!alive()) return;
+      const lines = [...tagline.querySelectorAll('.intro-line')];
+      let end = 0;
 
-      caption.textContent = LAST_LINE;              // 最后一幕停在 At Karina.
-      caption.classList.add('is-last');
-      await play(caption, ENTER_KF, { duration: 360, easing: EASE_IN, fill: 'both' }).finished.catch(() => {});
-      await sleep(380);
+      lines.forEach((el) => {
+        const words = [...el.querySelectorAll('.w')];
+        const start = Number(el.dataset.start) || 0;
+        const per = Number(el.dataset.per) || 240;
+        const exit = el.dataset.exit ? Number(el.dataset.exit) : null;
+        const pauseBefore = el.dataset.pauseBefore ? Number(el.dataset.pauseBefore) : 0;
+        const pause = Number(el.dataset.pause) || 0;
+        const n = words.length;
+
+        // 每个词揭示完成的时间点
+        const marks = [];
+        let t = 0;
+        for (let i = 1; i <= n; i++) {
+          if (pauseBefore && i === pauseBefore) t += pause;
+          t += per;
+          marks.push(t);
+        }
+        const total = exit !== null ? exit - start : marks[marks.length - 1] + 500;
+        end = Math.max(end, start + total);
+
+        const box = el.getBoundingClientRect();
+        const stops = words.map((w) => {
+          const wr = w.getBoundingClientRect();
+          return Math.max(0, Math.min(100, ((box.right - wr.right) / box.width) * 100));
+        });
+
+        const clip = (r) => `inset(-0.4em ${r}% -0.4em 0)`;
+        const kf = [{ clipPath: clip(100), offset: 0 }];
+        let prev = 100;
+        for (let i = 0; i < n; i++) {
+          const at = marks[i] / total;
+          const ramp = Math.max(0, at - 46 / total);            // 46ms 扫过，然后停住
+          kf.push({ clipPath: clip(prev), offset: ramp });
+          kf.push({ clipPath: clip(stops[i]), offset: at });
+          prev = stops[i];
+        }
+        if (exit !== null) {
+          kf.push({ clipPath: clip(0), offset: (total - 190) / total });
+          kf.push({ clipPath: 'inset(-0.4em 0 0 100%)', offset: 1 });   // 整句向左划走
+        } else {
+          kf.push({ clipPath: clip(0), offset: 1 });                    // 末句停住（显式终帧）
+        }
+        play(el, kf, { duration: total, delay: start, fill: 'both' });
+      });
+
+      await sleep(end + 120);
       if (!alive()) return;
       phase = 'waiting-go';
       go.hidden = false;

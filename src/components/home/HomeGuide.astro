@@ -1,0 +1,231 @@
+---
+// 首页：9 屏纯色沉浸式引导页（无顶栏、无页脚）
+// 每一屏 = 一个栏目：一个标题 + 几个二级目录（点进去就是该栏目里的真实页面）。
+// 向下滚动时，下一屏用自己的底色从下往上扫过来（与开场第二幕同一质感）。
+import { getNav } from '../../lib/nav';
+
+const nav = await getNav();
+
+// 9 屏配色：酒红 / 米色 / 苹果青 / 墨黑 / 陶土 / 橄榄 / 石板蓝 / 梅紫 / 品牌橙
+const PALETTE = [
+  { bg: '#2b0705', ink: '#ff4813', accent: '#ff4813' },   // 01 SEO：酒红 + 橙色字
+  { bg: '#efe3cf', ink: '#241f1a', accent: '#b4451f' },   // 02 GEO：米色
+  { bg: '#0e6f6b', ink: '#f2fbf9', accent: '#ffd166' },   // 03 社媒联动：苹果青
+  { bg: '#14161a', ink: '#f2ede3', accent: '#ff4813' },   // 04 Google 算法：墨黑
+  { bg: '#a8452b', ink: '#fdf3e7', accent: '#ffd9a8' },   // 05 内容质量评估：陶土
+  { bg: '#2f3d24', ink: '#eee7d3', accent: '#d9a05b' },   // 06 摩天大楼优化：橄榄
+  { bg: '#26364f', ink: '#eef1f6', accent: '#9fc0ff' },   // 07 链接图谱：石板蓝
+  { bg: '#3b1d33', ink: '#f6e9f1', accent: '#ff8fb8' },   // 08 品牌实体检测：梅紫
+  { bg: '#ff4813', ink: '#1a0a05', accent: '#3b0f04' },   // 09 链接自动化：品牌橙
+];
+
+const panels = nav.slice(0, PALETTE.length).map((section, i) => {
+  const entries = [];
+  // 先放各分组的第一个页面（这就是"二级目录"）
+  for (const group of section.groups) {
+    const first = group.pages[0];
+    if (group.label && first) entries.push({ label: group.label, meta: `${group.pages.length} 篇`, url: first.url });
+  }
+  // 分组很少的栏目，再补几篇实际页面，保证每屏都有几个入口
+  if (entries.length < 4) {
+    for (const page of section.pages) {
+      if (entries.length >= 5) break;
+      if (!entries.some((e) => e.url === page.url)) entries.push({ label: page.title, meta: '', url: page.url });
+    }
+  }
+  return { section, color: PALETTE[i], entries, no: String(i + 1).padStart(2, '0'), latin: /^[A-Za-z0-9 &]+$/.test(section.label) };
+});
+
+const total = panels.length;
+---
+
+<div class="guide" id="guide">
+  {
+    panels.map(({ section, color, entries, no, latin }) => (
+      <section class="gpanel" style={`--bg:${color.bg}; --ink:${color.ink}; --accent:${color.accent}`} data-panel={no}>
+        <div class="gpanel-inner">
+          <div class="gpanel-head">
+            <span class="gpanel-no">{no}</span>
+            <h2 class="gpanel-title" data-latin={latin ? '1' : undefined}>{section.label}</h2>
+          </div>
+
+          <ul class="gpanel-sub">
+            {entries.map((e) => (
+              <li>
+                <a href={e.url}>
+                  <span class="gs-label">{e.label}</span>
+                  {e.meta && <span class="gs-meta">{e.meta}</span>}
+                  <span class="gs-arrow" aria-hidden="true">→</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+
+          <a class="gpanel-enter" href={section.url}>
+            进入 {section.label}
+            <span aria-hidden="true">→</span>
+          </a>
+
+          <span class="gpanel-count" aria-hidden="true">{no} / {String(total).padStart(2, '0')}</span>
+          {no === '01' && <span class="gpanel-hint" aria-hidden="true">向下滚动 ↓</span>}
+        </div>
+      </section>
+    ))
+  }
+</div>
+
+<style>
+  .guide { background: var(--bg); }
+
+  .gpanel {
+    position: relative;
+    min-height: 100vh;
+    min-height: 100svh;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    scroll-snap-align: start;
+    background: var(--bg);
+    color: var(--ink);
+  }
+
+  /* 下一屏用自己的底色扫过来 → 每次滚动都是一次纯色揭页 */
+  .gpanel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    background: var(--bg);
+    clip-path: inset(0 0 0 0);
+  }
+  .gpanel.is-in::before {
+    clip-path: inset(0 0 100% 0);
+    transition: clip-path 900ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .gpanel-inner {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 74rem;
+    padding: 6rem 3rem;
+  }
+  .gpanel > .gpanel-inner {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 620ms ease, transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .gpanel.is-in > .gpanel-inner { opacity: 1; transform: none; }
+
+  .gpanel-head { display: flex; align-items: baseline; gap: 1.25rem; flex-wrap: wrap; }
+  .gpanel-no {
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+    letter-spacing: 0.18em;
+    color: var(--accent);
+  }
+  .gpanel-title {
+    margin: 0;
+    font-size: clamp(2.6rem, 9vw, 7.5rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 0.95;
+  }
+  .gpanel-title[data-latin] {
+    font-family: var(--display);
+    font-style: italic;
+    font-synthesis: none;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+  }
+
+  .gpanel-sub { list-style: none; margin: 2.75rem 0 0; padding: 0; max-width: 46rem; }
+  .gpanel-sub li { border-top: 1px solid color-mix(in srgb, var(--ink) 26%, transparent); }
+  .gpanel-sub a {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 0.85rem 0;
+    font-size: 0.9375rem;
+    transition: padding 320ms cubic-bezier(0.22, 1, 0.36, 1), opacity 200ms ease;
+  }
+  .gpanel-sub a:hover { padding-left: 0.6rem; }
+  .gs-label { flex: 1; font-weight: 600; }
+  .gs-meta { font-size: 0.75rem; opacity: 0.6; }
+  .gs-arrow { opacity: 0; transform: translateX(-4px); transition: opacity 240ms ease, transform 240ms ease; color: var(--accent); }
+  .gpanel-sub a:hover .gs-arrow { opacity: 1; transform: none; }
+
+  .gpanel-enter {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 2.5rem;
+    padding: 0.55rem 1.1rem;
+    border: 1px solid color-mix(in srgb, var(--ink) 34%, transparent);
+    border-radius: 999px;
+    font-size: 0.875rem;
+    transition: transform 260ms ease, border-color 260ms ease;
+  }
+  .gpanel-enter:hover { transform: translateY(-1px); border-color: var(--accent); }
+  .gpanel-enter span { color: var(--accent); }
+
+  .gpanel-count {
+    position: absolute;
+    right: 3rem;
+    bottom: 2.5rem;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    opacity: 0.55;
+  }
+  .gpanel-hint {
+    position: absolute;
+    left: 3rem;
+    bottom: 2.5rem;
+    font-size: 0.6875rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    opacity: 0.5;
+  }
+
+  @media (max-width: 900px) {
+    .gpanel-inner { padding: 4.5rem 1.5rem; }
+    .gpanel-count { right: 1.5rem; }
+    .gpanel-hint { left: 1.5rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gpanel::before { display: none; }
+    .gpanel > .gpanel-inner { opacity: 1; transform: none; transition: none; }
+  }
+</style>
+
+<script>
+  const init = () => {
+    const guide = document.getElementById('guide');
+    const root = document.documentElement;
+    if (!guide) { root.classList.remove('guide-snap'); return; }
+
+    const panels = [...guide.querySelectorAll('.gpanel')];
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (reduced) {
+      panels.forEach((p) => p.classList.add('is-in'));
+    } else {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return;
+          e.target.classList.add('is-in');
+          io.unobserve(e.target);
+        });
+      }, { threshold: 0.3 });
+      panels.forEach((p) => io.observe(p));
+    }
+
+    root.classList.add('guide-snap');
+  };
+
+  init();
+  document.addEventListener('astro:page-load', init);
+</script>

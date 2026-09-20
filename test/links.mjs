@@ -21,7 +21,9 @@ for (const f of pages) {
   const tabs = hrefs(src, 'tabs');
   // 跳转页（旧地址 → 新地址）用的不是站点布局，不检查页脚
   const isRedirect = src.includes('http-equiv="refresh"');
-  if (!isRedirect && !src.includes('<footer class="footer">')) bad.push(`${f}: 没有页脚`);
+  // 首页是沉浸式引导页（无顶栏、无页脚），按设计豁免
+  const isHome = f === 'index.html';
+  if (!isRedirect && !isHome && !src.includes('<footer class="footer">')) bad.push(`${f}: 没有页脚`);
 
   for (const href of [...tabs, ...hrefs(src, 'sidebar'), ...bodyHrefs(src)]) {
     n++;

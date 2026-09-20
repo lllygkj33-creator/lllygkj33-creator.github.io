@@ -1731,20 +1731,41 @@ html.intro-on .home-intro { display: flex; align-items: center; justify-content:
   padding: 0 24px;
   text-align: center;
 }
-.intro-caption-wrap {
+/* 第一幕：整句预排的词 span，靠分段遮罩从左往右扫过 */
+.intro-tagline {
   display: grid;
   place-items: center;
+  width: 100%;
   min-height: 1.3em;
 }
-.intro-caption {
-  font-size: clamp(2.2rem, 4.2vw, 4.8rem);
+.intro-line {
+  grid-area: 1 / 1;
+  margin: 0;
+  display: flex;
+  gap: 0.3em;
+  font-size: clamp(2rem, 4.6vw, 4.4rem);
   font-weight: 400;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
   line-height: 1.12;
-  opacity: 0;
+  white-space: nowrap;
+  clip-path: inset(-0.4em 100% -0.4em 0);
+  will-change: clip-path;
 }
-.intro-caption.is-last { font-weight: 500; }
-.intro-caption-multi { display: flex; flex-direction: column; gap: 0.35em; }
+.intro-line .w { display: inline-block; }
+/* 斜体词用真正的 Fraunces italic（不是浏览器伪斜） */
+.intro-line .w.em {
+  font-family: var(--display);
+  font-style: italic;
+  font-synthesis: none;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+/* 字形轻微逐字错位 */
+.intro-line .w:nth-child(odd) { transform: translateY(-0.05em); }
+.intro-line .w:nth-child(3n) { transform: translateY(0.035em) rotate(-0.7deg); }
+/* 减少动效 / 已看过：只留首末两句，静态完整显示 */
+.intro-tagline.is-static .intro-line { display: none; clip-path: none; }
+.intro-tagline.is-static .intro-line[data-static] { display: flex; }
 
 .intro-enter {
   margin-top: 2.4rem;
@@ -1796,7 +1817,7 @@ html.intro-on .home-intro { display: flex; align-items: center; justify-content:
 }
 
 @media (max-width: 700px) {
-  .intro-caption { font-size: clamp(2rem, 10vw, 3.4rem); }
+  .intro-line { font-size: clamp(1.6rem, 8.4vw, 2.6rem); gap: 0.22em; }
   .intro-ghosts span:nth-child(n + 4) { display: none; }   /* 移动端只留 3 个 Ghost */
   .intro-skip { top: 1rem; right: 1rem; }
 }
@@ -1882,8 +1903,8 @@ html.intro-on .home-intro { display: flex; align-items: center; justify-content:
   padding: 0;
 }
 
-/* 首页杂志模式：整页纵向贴合滚动（proximity，不抢用户滚动） */
-html.mag-snap { scroll-snap-type: y proximity; }
+/* 首页引导页：整屏纵向贴合滚动（proximity，不抢用户滚动） */
+html.guide-snap { scroll-snap-type: y proximity; }
 @media (prefers-reduced-motion: reduce) {
-  html.mag-snap { scroll-snap-type: none; }
+  html.guide-snap { scroll-snap-type: none; }
 }

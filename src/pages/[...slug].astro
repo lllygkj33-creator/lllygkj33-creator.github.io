@@ -2,7 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
 import { getNav, sections, urlOf } from '../lib/nav';
-import MagazineHome from '../components/home/MagazineHome.astro';
+import HomeGuide from '../components/home/HomeGuide.astro';
 
 export async function getStaticPaths() {
   const pages = await getCollection('docs');
@@ -36,6 +36,7 @@ const i = group ? group.pages.findIndex((p) => p.url === current) : -1;
   next={i >= 0 ? group.pages[i + 1] : undefined}
   intro={entry.id === 'index'}
   compose={entry.id === 'index'}
+  bare={entry.id === 'index'}
 >
-  {entry.id === 'index' ? <MagazineHome /> : <Content />}
+  {entry.id === 'index' ? <HomeGuide /> : <Content />}
 </Layout>
