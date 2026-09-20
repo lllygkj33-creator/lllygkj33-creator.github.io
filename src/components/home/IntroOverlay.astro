@@ -1,0 +1,221 @@
+---
+// 首页开场 Overlay（V2.1 无缝接管）
+//   Stage 1  Tagline：每句整句用 clip-path 揭示，不做分词组补全、不做打字机
+//   Stage 2  Bridge ：橙色竖条 → 分裂 → 展开 → 收成字标（最后一帧与 Hero 完全一致）
+//   接管     ：Overlay 只做 200–350ms 淡出，不叠幕布，视觉不跳
+// 未来的 Lottie 资源放在 public/animations/home/{karina-tagline,karina-bridge}.json，
+// 载入到 #intro-tagline / #intro-bridge 即可替换占位动画，结构不用改。
+const LINES = [
+  'SEO. GEO. XEO. In Google.',
+  'Google Algorithms.',
+  'Real Cases.',
+  'All Things You Wanna Know.',
+  'At Karina Studio.',
+];
+---
+
+<div class="intro-overlay" id="intro-overlay" role="dialog" aria-label="网站开场">
+  <div class="intro-tagline" id="intro-tagline" data-anim="tagline" aria-hidden="true">
+    {LINES.map((line, i) => <span class="intro-line" data-line={i}>{line}</span>)}
+  </div>
+
+  <button class="intro-go" id="intro-go" type="button" hidden>GO Document Now →</button>
+
+  <div class="intro-bridge" id="intro-bridge" data-anim="bridge" aria-hidden="true">
+    <span class="kn-bars">
+      <span class="kn-bar" id="bar-a"></span>
+      <span class="kn-bar" id="bar-b"></span>
+    </span>
+    <div class="kn-wordmark" id="bridge-wordmark">
+      <span class="kn-word">Karina</span><span class="kn-slash">/</span><span class="kn-studio">Studio</span>
+      <span class="kn-accent"></span>
+    </div>
+  </div>
+
+  <button class="intro-skip" id="intro-skip" type="button">Skip</button>
+</div>
+
+<script>
+  // ── 时间轴（毫秒）───────────────────────────────────────────────
+  const WINDOWS = [          // 每句的展示窗口：进入 → 下一句开始时被揭示出去
+    [0, 550],
+    [550, 1050],
+    [1050, 1500],
+    [1500, 2150],
+    [2150, null],            // 末句不退出，停住等 GO
+  ];
+  const ENTER = 200;
+  const EXIT = 150;
+  const GO_AT = 2850;        // 末句停留后出现 GO
+  const BRIDGE_MS = 2200;    // 第二幕 2.1–2.5s
+  const HANDOFF_MS = 280;    // Overlay 淡出
+  const MAX_WAIT = 6000;     // 兜底：最多 6 秒必须进 Hero
+  const KEY = 'homepage_intro_seen';
+
+  const EASE_IN = 'cubic-bezier(.22, 1, .36, 1)';
+  const EASE_OUT = 'cubic-bezier(.4, 0, 1, 1)';
+
+  // 整句揭示：从右向左"划出"，不是渐显、不是打字机
+  const REVEAL_IN = [
+    { clipPath: 'inset(0 100% 0 0)', transform: 'translateY(6px) skewX(2.5deg)', opacity: 1 },
+    { clipPath: 'inset(0 0% 0 0)', transform: 'translateY(0) skewX(0deg)', opacity: 1 },
+  ];
+  const REVEAL_OUT = [
+    { clipPath: 'inset(0 0% 0 0)', transform: 'translateY(0)', opacity: 1 },
+    { clipPath: 'inset(0 0 0 100%)', transform: 'translateY(-6px)', opacity: 0.85 },
+  ];
+
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const isSeen = () => { try { return sessionStorage.getItem(KEY) === '1'; } catch { return false; } };
+  const markSeen = () => { try { sessionStorage.setItem(KEY, '1'); } catch { /* 隐私模式 */ } };
+
+  const init = () => {
+    const overlay = document.getElementById('intro-overlay');
+    if (!overlay) return;
+    const root = document.documentElement;
+    const lines = [...overlay.querySelectorAll('.intro-line')];
+    const go = document.getElementById('intro-go');
+    const skip = document.getElementById('intro-skip');
+    const bridge = document.getElementById('intro-bridge');
+    const barA = document.getElementById('bar-a');
+    const barB = document.getElementById('bar-b');
+    const bridgeMark = document.getElementById('bridge-wordmark');
+    const tagline = document.getElementById('intro-tagline');
+
+    let state = 'idle';                 // idle → tagline → waiting-go → bridge → handoff → hero → done
+    let finished = false;
+
+    // 直接进 Hero 最终帧（移动端 / 减少动效 / 本 session 已看过 / 兜底）
+    const toHero = (mark) => {
+      if (finished) return;
+      finished = true;
+      state = 'hero';
+      overlay.getAnimations({ subtree: true }).forEach((a) => a.cancel());
+      overlay.hidden = true;
+      root.classList.remove('intro-on');
+      if (mark) markSeen();
+      state = 'done';
+    };
+
+    const seenNow = isSeen();
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const small = window.innerWidth < 1024;      // <1024 不播开场，直接 Hero
+    if (seenNow || reduced || small) { toHero(false); return; }
+
+    // 兜底：无论发生什么，6 秒后必须看到 Hero
+    const watchdog = setTimeout(() => { if (!finished) toHero(true); }, MAX_WAIT);
+
+    skip.addEventListener('click', () => { clearTimeout(watchdog); toHero(true); });
+
+    // ── Stage 1：整句揭示 ──
+    const runTagline = () => {
+      state = 'tagline';
+      // 一句一条动画，把整段生命周期写进关键帧。
+      // 不能拆成"进入 + 退出"两条都 fill:'both'：后建的退出动画会在延迟阶段
+      // 就把自己的首帧（完全展开）应用上去，导致后面几句提前显示、叠在一起。
+      lines.forEach((el, i) => {
+        const [start, end] = WINDOWS[i];
+        const duration = (end === null ? GO_AT + 150 : end) - start;
+        const inAt = ENTER / duration;
+        let kf;
+        if (end === null) {
+          // 末句必须显式给出 100% 关键帧：缺省时浏览器会用元素基础样式（隐藏）补齐，
+          // 结果末句在动画结束后被拉回隐藏态
+          kf = [
+            { ...REVEAL_IN[0] },
+            { ...REVEAL_IN[1], offset: inAt, easing: EASE_IN },
+            { ...REVEAL_IN[1], offset: 1 },
+          ];
+        } else {
+          const outAt = (duration - EXIT) / duration;
+          kf = [
+            { ...REVEAL_IN[0] },
+            { ...REVEAL_IN[1], offset: inAt, easing: EASE_IN },
+            { ...REVEAL_OUT[0], offset: outAt, easing: EASE_OUT },
+            { ...REVEAL_OUT[1], offset: 1 },
+          ];
+        }
+        el.animate(kf, { duration, delay: start, fill: 'both' });
+      });
+      setTimeout(() => {
+        if (finished) return;
+        state = 'waiting-go';
+        go.hidden = false;
+        requestAnimationFrame(() => go.classList.add('is-on'));
+      }, GO_AT);
+    };
+
+    // ── Stage 2：橙色形状 → 字标 ──
+    const runBridge = async () => {
+      if (finished) return;
+      clearTimeout(watchdog);
+      state = 'bridge';
+      go.disabled = true;
+      go.classList.remove('is-on');
+
+      // 标语退场（整句划走，不做淡入淡出堆叠）
+      lines.forEach((el, i) => el.animate(REVEAL_OUT, { duration: 160, delay: i * 30, easing: EASE_OUT, fill: 'both' }));
+      tagline.classList.add('is-gone');
+
+      await sleep(180);
+      if (finished) return;
+
+      overlay.classList.add('is-bridge');      // 显示第二幕层，Hero 仍在下面
+
+      // Beat 1（400ms）：中央橙色竖条长出来
+      barA.animate([{ transform: 'scaleY(0) scaleX(1)' }, { transform: 'scaleY(1) scaleX(1)' }],
+        { duration: 400, easing: EASE_IN, fill: 'both' });
+      barB.animate([{ transform: 'scaleY(0) scaleX(0.6)', opacity: 0 }, { transform: 'scaleY(1) scaleX(0.6)', opacity: 1 }],
+        { duration: 400, delay: 60, easing: EASE_IN, fill: 'both' });
+
+      // Beat 2（420ms）：分裂 / 斜切
+      await sleep(400);
+      if (finished) return;
+      barA.animate([{ transform: 'translateX(0) skewY(0deg)' }, { transform: 'translateX(-3.2rem) skewY(-6deg)' }],
+        { duration: 420, easing: EASE_IN, fill: 'both' });
+      barB.animate([{ transform: 'translateX(0) skewY(0deg)' }, { transform: 'translateX(3.2rem) skewY(6deg)' }],
+        { duration: 420, easing: EASE_IN, fill: 'both' });
+
+      // Beat 3（520ms）：竖条横向展开成色块，字标开始被"划出"
+      await sleep(420);
+      if (finished) return;
+      barA.animate([{ transform: 'translateX(-3.2rem) skewY(-6deg) scaleX(1)' }, { transform: 'translateX(-6rem) skewY(0deg) scaleX(7)' }],
+        { duration: 520, easing: EASE_IN, fill: 'both' });
+      barB.animate([{ transform: 'translateX(3.2rem) skewY(6deg) scaleX(1)' }, { transform: 'translateX(6rem) skewY(0deg) scaleX(7)' }],
+        { duration: 520, easing: EASE_IN, fill: 'both' });
+      bridgeMark.animate([
+        { clipPath: 'inset(0 100% 0 0)', opacity: 1 },
+        { clipPath: 'inset(0 0% 0 0)', opacity: 1 },
+      ], { duration: 520, easing: EASE_IN, fill: 'both' });
+
+      // Beat 4（460ms）：色块收成字标下的一条强调线，字标轻微拉伸后停住
+      await sleep(520);
+      if (finished) return;
+      barA.animate([{ transform: 'translateX(-6rem) scaleX(7)', opacity: 1 }, { transform: 'translateX(0) scaleX(1)', opacity: 0 }],
+        { duration: 460, easing: EASE_IN, fill: 'both' });
+      barB.animate([{ transform: 'translateX(6rem) scaleX(7)', opacity: 1 }, { transform: 'translateX(0) scaleX(1)', opacity: 0 }],
+        { duration: 460, easing: EASE_IN, fill: 'both' });
+      bridgeMark.animate([
+        { transform: 'scaleX(1.06)', letterSpacing: '-0.02em' },
+        { transform: 'scaleX(1)', letterSpacing: '-0.05em' },
+      ], { duration: 460, easing: EASE_IN, fill: 'both' });
+
+      // 收尾：此刻第二幕最后一帧已与下层 Hero 一致，Overlay 只做淡出
+      await sleep(BRIDGE_MS - 400 - 420 - 520 + 40);
+      if (finished) return;
+      state = 'handoff';
+      bridge.getAnimations({ subtree: true }).forEach((a) => { a.effect.updateTiming({ fill: 'forwards' }); });
+      overlay.animate([{ opacity: 1 }, { opacity: 0 }], { duration: HANDOFF_MS, easing: EASE_OUT, fill: 'forwards' });
+      await sleep(HANDOFF_MS);
+      toHero(true);
+    };
+
+    go.addEventListener('click', runBridge);
+
+    // 同样给一条自动兜底路径：用户不点 GO 也不会被永远挡住（6s 兜底已在上面）
+    runTagline();
+  };
+
+  init();
+  document.addEventListener('astro:page-load', init);
+</script>

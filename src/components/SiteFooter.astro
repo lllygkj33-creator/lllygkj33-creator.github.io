@@ -1,0 +1,31 @@
+---
+// 站点页脚：文档页与首页 Hero 共用
+import Social from './Social.astro';
+const { nav } = Astro.props;
+---
+<footer class="footer">
+  <div class="footer-in">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a class="brand" href="/">
+          <img class="brand-logo footer-logo" src="/logo.webp" alt="" width="76" height="30" />
+          <span>Seo Geo Docs</span>
+        </a>
+        <p>SEO / GEO 的方法与记录</p>
+      </div>
+
+      <div class="footer-col">
+        <p>Content</p>
+        {nav.map((s) => <a href={s.url}>{s.label}</a>)}
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© 2026 seo/geo docs</span>
+      <div class="footer-links">
+        <a href="https://github.com/">GitHub</a>
+        <Social class="social-footer" />
+      </div>
+    </div>
+  </div>
+</footer>

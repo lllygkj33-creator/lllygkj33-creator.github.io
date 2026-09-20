@@ -1652,95 +1652,116 @@ html.toc-off .main { max-width: 72rem; }
 :root[data-theme='dark'] .la-score[data-tone='weak'] .la-score-fill { background: #e0a35c; }
 :root[data-theme='dark'] .la-score[data-tone='low'] .la-score-fill { background: #e07a70; }
 
-/* ── 首页开场：电影字幕式 Intro（仅首页渲染，整页覆盖）────────────────────
-   html.intro-on   由 <head> 内联脚本在首帧前加上 → 不会先闪一下首页
-   .home-intro     深酒红全屏层：Ghost Words + 中央字幕 + ENTER / Skip
-   .intro-reveal   clip-path 幕布向上揭开，同时首页 12px 淡入
-   ------------------------------------------------------------------ */
+/* ── 首页开场 V2.1：两段动画 + Hero 无缝接管 ──────────────────────────────
+   html.intro-on  由 <head> 内联脚本在首帧前加上（桌面 / 未看过 / 非减少动效）
+   .kn-wordmark   Overlay 第二幕与 Hero 共用同一份标记与样式 → 最后一帧逐像素对齐
+   ────────────────────────────────────────────────────────────────────── */
+:root {
+  --kn-orange: #ff4813;
+  --kn-bg: #220301;
+  --kn-ink: #ffe2d8;
+}
 html.intro-on { overflow: hidden; }
-html.intro-on .layout,
-html.intro-on .footer { opacity: 0; }
 
-.home-intro {
+.kn-wordmark {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.02em;
+  color: var(--kn-orange);
+  font-weight: 700;
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+}
+.kn-word, .kn-studio { font-size: clamp(2.6rem, 11vw, 16rem); white-space: nowrap; }
+.kn-slash { font-size: clamp(2rem, 8vw, 11rem); opacity: 0.92; }
+.kn-accent {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  bottom: -0.26em;
+  height: 0.08em;
+  background: currentColor;
+  opacity: 0.9;
+}
+
+/* Hero：首页首屏最终帧（一开始就在，Overlay 覆盖其上） */
+body.kn-home { background: var(--kn-bg); color: var(--kn-ink); }
+.home-hero {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6rem 1.5rem;
+  background: var(--kn-bg);
+  overflow: hidden;
+}
+.kn-stage { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; }
+.kn-meta {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 2.75rem;
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  font-size: 0.6875rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.5;
+}
+
+/* 首页页脚：把站内变量映射到深酒红底 */
+body.kn-home .footer {
+  --border: rgba(255, 226, 216, 0.18);
+  --muted: rgba(255, 226, 216, 0.62);
+  --faint: rgba(255, 226, 216, 0.45);
+  --body: var(--kn-ink);
+  --text: var(--kn-ink);
+  color: var(--kn-ink);
+  background: var(--kn-bg);
+}
+body.kn-home .brand-logo { filter: invert(1); }
+
+/* Overlay */
+.intro-overlay {
   position: fixed;
   inset: 0;
-  z-index: 100;
+  z-index: 2147483647;
   display: none;
-  overflow: hidden;
-  background: #240502;
-  color: #f4e8df;
-  will-change: clip-path;
-}
-html.intro-on .home-intro { display: flex; align-items: center; justify-content: center; }
-.home-intro[hidden] { display: none !important; }
-
-.intro-ghosts {
-  position: absolute;
-  inset: 0;
-  transform: rotate(-24deg) scale(1.35);
-  pointer-events: none;
-  user-select: none;
-}
-.intro-ghosts span {
-  position: absolute;
-  font-size: clamp(1.5rem, 3vw, 3.5rem);
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: #f4e8df;
-  opacity: 0.05;
-  white-space: nowrap;
-  animation: intro-drift-a 11s ease-in-out infinite alternate;
-}
-.intro-ghosts span:nth-child(1) { top: 14%; left: 6%; animation-duration: 9s; }
-.intro-ghosts span:nth-child(2) { top: 12%; right: 8%; animation-name: intro-drift-b; animation-duration: 13s; }
-.intro-ghosts span:nth-child(3) { bottom: 16%; left: 10%; animation-name: intro-drift-c; animation-duration: 14s; }
-.intro-ghosts span:nth-child(4) { top: 48%; right: 4%; animation-duration: 10s; }
-.intro-ghosts span:nth-child(5) { bottom: 12%; right: 14%; animation-name: intro-drift-b; animation-duration: 12s; }
-.intro-ghosts span:nth-child(6) { top: 44%; left: 2%; animation-name: intro-drift-c; animation-duration: 11s; }
-.intro-ghosts span:nth-child(7) { bottom: 30%; right: 30%; animation-name: intro-drift-b; animation-duration: 14s; opacity: 0.04; }
-.intro-ghosts span:nth-child(8) { top: 28%; left: 32%; animation-duration: 13s; opacity: 0.035; }
-.intro-ghosts span:nth-child(9) { bottom: 6%; left: 42%; animation-name: intro-drift-c; animation-duration: 10s; opacity: 0.045; }
-
-@keyframes intro-drift-a {
-  from { transform: translate3d(0, 0, 0); opacity: 0.05; }
-  to { transform: translate3d(38px, -24px, 0); opacity: 0.065; }
-}
-@keyframes intro-drift-b {
-  from { transform: translate3d(0, 0, 0); opacity: 0.055; }
-  to { transform: translate3d(-46px, 28px, 0); opacity: 0.04; }
-}
-@keyframes intro-drift-c {
-  from { transform: translate3d(0, 0, 0); opacity: 0.045; }
-  to { transform: translate3d(26px, 40px, 0); opacity: 0.06; }
-}
-
-.intro-center {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  padding: 0 24px;
-  text-align: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--kn-bg);
+  color: var(--kn-ink);
 }
-.intro-caption-wrap {
-  display: grid;
-  place-items: center;
-  min-height: 1.3em;
-}
-.intro-caption {
-  font-size: clamp(2.2rem, 4.2vw, 4.8rem);
+html.intro-on .intro-overlay { display: flex; }
+.intro-overlay[hidden] { display: none !important; }
+
+/* Stage 1：五句同格叠放，靠 clip-path 揭示（不产生 reflow） */
+.intro-tagline { display: grid; place-items: center; width: 100%; padding: 0 2rem; }
+.intro-tagline.is-gone { visibility: hidden; }
+.intro-line {
+  grid-area: 1 / 1;
+  font-size: clamp(2rem, 4.6vw, 4.4rem);
   font-weight: 400;
   letter-spacing: -0.03em;
-  line-height: 1.12;
-  opacity: 0;
+  line-height: 1.15;
+  white-space: nowrap;
+  clip-path: inset(0 100% 0 0);
+  will-change: clip-path, transform;
 }
-.intro-caption.is-last { font-weight: 500; }
-.intro-caption-multi { display: flex; flex-direction: column; gap: 0.35em; }
 
-.intro-enter {
-  margin-top: 2.4rem;
-  padding: 0.35rem 0.6rem;
+.intro-go {
+  position: absolute;
+  bottom: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.4rem 0.6rem;
   border: 0;
   background: none;
   color: inherit;
@@ -1749,18 +1770,17 @@ html.intro-on .home-intro { display: flex; align-items: center; justify-content:
   letter-spacing: 0.08em;
   cursor: pointer;
   opacity: 0;
-  transition: opacity 420ms ease;
+  transition: opacity 380ms ease, transform 240ms ease;
 }
-.intro-enter[data-on='1'] { opacity: 0.85; }
-.intro-enter:hover,
-.intro-enter:focus-visible { opacity: 1; }
-.intro-enter:focus-visible { outline: 1px solid currentColor; outline-offset: 4px; }
+.intro-go.is-on { opacity: 0.9; }
+.intro-go:hover,
+.intro-go:focus-visible { opacity: 1; transform: translateX(-50%) translateX(3px); }
+.intro-go:focus-visible { outline: 1px solid currentColor; outline-offset: 4px; }
 
 .intro-skip {
   position: absolute;
   top: 1.5rem;
   right: 1.75rem;
-  z-index: 3;
   padding: 0.25rem 0.4rem;
   border: 0;
   background: none;
@@ -1773,92 +1793,23 @@ html.intro-on .home-intro { display: flex; align-items: center; justify-content:
 }
 .intro-skip:hover,
 .intro-skip:focus-visible { opacity: 0.9; }
-.intro-skip:focus-visible { outline: 1px solid currentColor; outline-offset: 3px; }
 
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-@media (max-width: 700px) {
-  .intro-caption { font-size: clamp(2rem, 10vw, 3.4rem); }
-  .intro-ghosts span:nth-child(n + 4) { display: none; }   /* 移动端只留 3 个 Ghost */
-  .intro-skip { top: 1rem; right: 1rem; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .intro-ghosts span { animation: none; }
-  .intro-enter { transition: none; }
-}
-
-/* ── 首页开场第二幕：Karina Studio 大字排版 + 橙色铺屏 ────────────────────
-   四个 Beat（KARINA 长出 → 横向拉伸 → STUDIO 接管 → 收束）由 WAAPI 驱动，
-   这里只定义静态排版、橙色色值与铺屏层。
-   ------------------------------------------------------------------ */
-.home-intro { --karina-orange: #ff5a1f; }
-.home-intro.is-stage-two { background: #240502; }
-.home-intro.is-wipe { background: transparent; }
-
-.intro-stage {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.intro-stage[hidden] { display: none !important; }
-
-.karina-type {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.06em;
-  width: 100%;
+/* Stage 2：橙色竖条 → 分裂 → 展开 → 收成字标 */
+.intro-bridge { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; }
+.intro-overlay.is-bridge .intro-bridge { display: flex; }
+.kn-bars { position: absolute; display: flex; align-items: center; justify-content: center; }
+.kn-bar {
+  display: block;
+  width: 0.55rem;
+  height: 44vh;
+  height: 44svh;
+  background: var(--kn-orange);
   transform-origin: 50% 50%;
   will-change: transform, opacity;
 }
-.karina-word,
-.studio-word {
-  display: block;
-  font-weight: 700;
-  line-height: 0.86;
-  letter-spacing: -0.04em;
-  color: var(--karina-orange);
-  white-space: nowrap;
-  opacity: 0;
-}
-.karina-word { font-size: clamp(3.4rem, 26vw, 20rem); }
-.studio-word { font-size: clamp(2.6rem, 21vw, 16rem); margin-top: -0.05em; }
-.intro-stage-two.is-uppercase .karina-word,
-.intro-stage-two.is-uppercase .studio-word { text-transform: uppercase; }
+.kn-bar + .kn-bar { margin-left: 1.4rem; }
+.intro-bridge .kn-wordmark { position: relative; z-index: 2; }
 
-.karina-wipe {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background: var(--karina-orange);
-  transform: scale(0.05);
-  opacity: 0;
-  will-change: transform, clip-path;
-}
-
-.intro-enter {
-  transition: opacity 420ms ease, transform 260ms ease;
-}
-.intro-enter:hover,
-.intro-enter:focus-visible { transform: translateX(3px); }
-
-@media (max-width: 700px) {
-  .karina-word { font-size: clamp(4.8rem, 24vw, 8rem); }
-  .studio-word { font-size: clamp(4rem, 20vw, 6.6rem); }
+@media (max-width: 1023px) {
+  .kn-meta { gap: 1rem; font-size: 0.625rem; bottom: 2rem; }
 }
