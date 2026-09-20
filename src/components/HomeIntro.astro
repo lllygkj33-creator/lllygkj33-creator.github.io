@@ -9,11 +9,12 @@ const GHOSTS = ['SEO', 'GEO', 'XEO', 'GOOGLE', 'ALGORITHM', 'CASE', 'SEARCH', 'C
 // 第一幕文案：每个词是一个 span，整句预排好，用遮罩从左往右扫过去（不是打字机、不改 DOM 文本）。
 // [词, 是否斜体]；start/per/exit/pauseBefore/pause 是时间轴（毫秒）。
 const LINES = [
-  { words: [['SEO.'], ['GEO.'], ['XEO.'], ['In', true], ['Google.']], start: 300, per: 240, pauseBefore: 4, pause: 380, exit: 2300 },
-  { words: [['Google'], ['Algorithms.']], start: 2300, per: 220, exit: 3050 },
-  { words: [['Real'], ['Cases.']], start: 3050, per: 210, exit: 3750 },
-  { words: [['All'], ['Things'], ['You'], ['Wanna'], ['Know.']], start: 3750, per: 300, exit: 5550 },
-  { words: [['At'], ['Karina', true], ['Studio', true]], start: 5550, per: 240, last: true },
+  // 一行一句话，共 5 行；每行切换比上一版慢约 0.3 秒
+  { words: [['SEO.'], ['GEO.'], ['XEO.'], ['In', true], ['Google.']], start: 300, per: 270, pauseBefore: 4, pause: 430, exit: 2650 },
+  { words: [['Google'], ['Algorithms.']], start: 2650, per: 260, exit: 3550 },
+  { words: [['Real'], ['Cases.']], start: 3550, per: 250, exit: 4450 },
+  { words: [['All'], ['Things'], ['You'], ['Wanna'], ['Know.']], start: 4450, per: 340, exit: 6750 },
+  { words: [['At'], ['Karina', true], ['Studio', true]], start: 6750, per: 290, last: true },
 ];
 const LAST_STATIC = 'At Karina Studio';
 ---
@@ -44,7 +45,7 @@ const LAST_STATIC = 'At Karina Studio';
 
       <button class="intro-enter" id="intro-enter" type="button" hidden>Lets Go →</button>
 
-      <p class="visually-hidden">Karina Studio — SEO / GEO / XEO、Google 算法、真实案例</p>
+      <p class="visually-hidden">Karina Studio — SEO / GEO / XEO, Google algorithms, real cases.</p>
     </div>
   </div>
 

@@ -31,16 +31,69 @@ const luminance = (hex) => {
   return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
 };
 
+// 首页 9 屏全英文（文档页仍用 nav.ts 里的中文，不动）
+const SECTION_EN = {
+  seo: 'SEO',
+  geo: 'GEO',
+  social: 'Social',
+  'google-algorithm': 'Google Algorithms',
+  'content-quality': 'Content Quality',
+  skyscraper: 'Skyscraper',
+  'link-graph': 'Link Graph',
+  'brand-entity-audit': 'Brand Entity Audit',
+  'link-automation': 'Link Automation',
+};
+
+const GROUP_EN = {
+  基础: 'Basics',
+  内容: 'Content',
+  页面: 'On-page',
+  技术: 'Technical',
+  链接: 'Links',
+  分析: 'Analytics',
+  概念: 'Concepts',
+  答案: 'Answers',
+  实体: 'Entities',
+  机器: 'Machine',
+  测量: 'Measurement',
+  平台: 'Platform',
+  用户与社区: 'Community',
+  社交与内容: 'Social & Content',
+  视觉与发现: 'Visual & Discovery',
+  技术与创客: 'Technical & Makers',
+  趋势与需求: 'Trends & Demand',
+  概览: 'Overview',
+  规范: 'Spec',
+  实例: 'Examples',
+  示例: 'Examples',
+  维度: 'Dimensions',
+  质量: 'Quality',
+  语义: 'Semantics',
+  信号: 'Signals',
+};
+
+// 中文标题的页面用它自己的 slug 生成英文名（首页不出现中文）
+const slugLabel = (url) => {
+  const last = url.replace(/\/$/, '').split('/').pop() || '';
+  return last
+    .split('-')
+    .map((w) => (w.length <= 3 && /^(on|of|and|the|for|in)$/.test(w) ? w : w.charAt(0).toUpperCase() + w.slice(1)))
+    .join(' ');
+};
+
 const panels = nav.slice(0, PALETTE.length).map((section, i) => {
   const entries = [];
   for (const group of section.groups) {
     const first = group.pages[0];
-    if (group.label && first) entries.push({ label: group.label, meta: `${group.pages.length} 篇`, url: first.url });
+    if (group.label && first) {
+      entries.push({ label: GROUP_EN[group.label] || slugLabel(first.url), meta: `${group.pages.length} pages`, url: first.url });
+    }
   }
+  // 分组少的栏目：用该栏页面的 slug 生成英文条目，保证每屏有 4–5 条、且不出现中文
   if (entries.length < 4) {
     for (const page of section.pages) {
       if (entries.length >= 5) break;
-      if (!entries.some((e) => e.url === page.url)) entries.push({ label: page.title, meta: '', url: page.url });
+      if (!entries.some((e) => e.url === page.url)) entries.push({ label: slugLabel(page.url), meta: '', url: page.url });
     }
   }
   // 白字方案：底色越浅，压暗越重（深色底给一点点，避免纯黑更沉）
@@ -54,7 +107,7 @@ const panels = nav.slice(0, PALETTE.length).map((section, i) => {
     color: PALETTE[i],
     entries,
     no: String(i + 1).padStart(2, '0'),
-    latin: /^[A-Za-z0-9 &]+$/.test(section.label),
+    titleEn: SECTION_EN[section.id] || section.label,
     textScrim,
   };
 });
@@ -64,7 +117,7 @@ const total = panels.length;
 
 <div class="guide" id="guide">
   {
-    panels.map(({ section, color, entries, no, latin, textScrim }) => (
+    panels.map(({ section, color, entries, no, titleEn, textScrim }) => (
       <section
         class="gpanel"
         style={`--bg:${color.bg}; --ink:${color.ink}; --accent:${color.accent};${color.scrim ? ` --scrim:${color.scrim};` : ''}`}
@@ -82,7 +135,7 @@ const total = panels.length;
 
           <div class="gpanel-head" data-head>
             <span class="gpanel-no">{no}</span>
-            <h2 class="gpanel-title" data-latin={latin ? '1' : undefined}>{section.label}</h2>
+            <h2 class="gpanel-title">{titleEn}</h2>
           </div>
 
           <div class="gpanel-rail" data-rail>
@@ -94,13 +147,13 @@ const total = panels.length;
             ))}
 
             <a class="gline gline-enter" href={section.url}>
-              <span class="gline-label">进入 {section.label}</span>
+              <span class="gline-label">Enter {titleEn}</span>
               <span class="gline-arrow" aria-hidden="true">→</span>
             </a>
           </div>
 
           <span class="gpanel-count" aria-hidden="true">{no} / {String(total).padStart(2, '0')}</span>
-          {no === '01' && <span class="gpanel-hint" aria-hidden="true">向下滚动 ↓</span>}
+          {no === '01' && <span class="gpanel-hint" aria-hidden="true">Scroll ↓</span>}
         </div>
       </section>
     ))
@@ -165,6 +218,7 @@ const total = panels.length;
     pointer-events: none;
   }
   .gpanel-no {
+    font-style: italic;
     font-family: var(--mono);
     font-size: 0.8125rem;
     letter-spacing: 0.18em;
@@ -172,20 +226,17 @@ const total = panels.length;
     opacity: 0.72;
     align-self: center;
   }
+  /* 全英文 + 统一斜体（Fraunces 真斜体） */
   .gpanel-title {
     margin: 0;
     color: #fff;
-    font-size: clamp(2.6rem, 10vw, 8.5rem);
-    font-weight: 700;
-    letter-spacing: -0.03em;
-    line-height: 0.95;
-  }
-  .gpanel-title[data-latin] {
     font-family: var(--display);
     font-style: italic;
     font-synthesis: none;
     font-weight: 400;
+    font-size: clamp(2.4rem, 9vw, 8rem);
     letter-spacing: -0.02em;
+    line-height: 0.95;
   }
 
   /* 二级目录卡片轨道：从下方 60vh 升到 0 */
@@ -222,7 +273,6 @@ const total = panels.length;
   .gline-label { white-space: nowrap; }
   .gline-arrow {
     font-size: 0.8125rem;
-    font-style: normal;
     opacity: 0;
     transform: translateX(-4px);
     transition: opacity 240ms ease, transform 240ms ease;
@@ -237,6 +287,7 @@ const total = panels.length;
     top: 2.5rem;
     z-index: 3;
     color: #fff;
+    font-style: italic;
     font-family: var(--mono);
     font-size: 0.75rem;
     letter-spacing: 0.14em;
@@ -248,9 +299,9 @@ const total = panels.length;
     bottom: 2.5rem;
     z-index: 3;
     color: #fff;
+    font-style: italic;
     font-size: 0.6875rem;
     letter-spacing: 0.2em;
-    text-transform: uppercase;
     opacity: 0.5;
   }
 
