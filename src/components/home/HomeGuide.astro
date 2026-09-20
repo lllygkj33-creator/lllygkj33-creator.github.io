@@ -1,10 +1,10 @@
 ---
 // 首页：9 屏沉浸式引导页（无顶栏、无页脚）
-// 滚动模型 = 固定视窗中的短行程滚动驱动差速视差（pinned scroll-scrub，本地实现，无 GSAP）：
-//   容器 120svh / 舞台 sticky 100svh / 真实滚动行程约 20svh
-//   滚动 20svh 时：巨型标题上移 23vh，二级目录卡片组从下方 60vh 升到 0
-//   追随延迟 ≈ scrub 0.85（每帧 lerp 逼近，不是硬跟滚轮）
-//   卡片完全进入后：按鼠标横向位置平滑拖动整条轨道；悬停卡片放大
+// 滚动模型 = 整屏吸附 + 差速进场（一屏一页，本地实现，无 GSAP）：
+//   每屏正好 100svh，吸附（y mandatory）→ 滚动必定落到整屏，不会停在两页之间
+//   某屏成为"当前整屏"时：巨型标题从 +23vh 落到 0，二级目录横线组从 60vh 升到 0
+//   两段用不同时长与延迟，形成缓慢的"被推动到下一页"的差速感
+//   当前整屏内：按鼠标横向位置平滑拖动整条轨道（轨道超出视口时才生效）
 import { getNav } from '../../lib/nav';
 
 const nav = await getNav();
@@ -165,19 +165,19 @@ const total = panels.length;
 <style>
   .guide { background: var(--bg); }
 
-  /* 容器 120svh，舞台 100svh sticky：真实滚动行程 = 20svh */
+  /* 一屏一页：整屏吸附，滚动必定落到某一屏（不会停在两页之间） */
   .gpanel {
     position: relative;
-    height: 120vh;
-    height: 120svh;
+    height: 100vh;
+    height: 100svh;
+    overflow: hidden;
+    scroll-snap-align: start;
     background: var(--bg);
     color: var(--ink);
   }
   .gpanel-stage {
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    height: 100svh;
+    position: absolute;
+    inset: 0;
     overflow: hidden;
     background: var(--bg);
   }
@@ -212,7 +212,10 @@ const total = panels.length;
     flex-wrap: wrap;
     padding: 0 3rem;
     will-change: transform;
+    transform: translate3d(0, 23vh, 0);
+    transition: transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
   }
+  .gpanel.is-front .gpanel-head { transform: translate3d(0, 0, 0); }
   .gpanel-textscrim {
     position: absolute;
     inset: 0;
@@ -253,7 +256,10 @@ const total = panels.length;
     width: max-content;
     padding: 0 3rem 5vh;
     will-change: transform;
+    transform: translate3d(var(--rail-x, 0px), 60vh, 0);
+    transition: transform 980ms cubic-bezier(0.22, 1, 0.36, 1) 60ms;
   }
+  .gpanel.is-front .gpanel-rail { transform: translate3d(var(--rail-x, 0px), 0, 0); }
 
   /* 一条横线 + 白色斜体字（中文也走斜体，浏览器会对中日韩字形做倾斜） */
   .gline {
@@ -315,12 +321,11 @@ const total = panels.length;
     .gpanel-hint { left: 1.5rem; }
   }
 
-  /* 减少动效：不留 sticky 行程，直接静态呈现 */
   @media (prefers-reduced-motion: reduce) {
-    .gpanel { height: 100vh; height: 100svh; }
-    .gpanel-stage { position: relative; }
-    .gpanel-head, .gpanel-rail { transform: none !important; }
-    .gpanel-rail { position: static; padding: 0 1.5rem 4vh; }
+    .gpanel-head,
+    .gpanel-rail,
+    .gpanel.is-front .gpanel-head,
+    .gpanel.is-front .gpanel-rail { transform: none; transition: none; }
   }
 </style>
 
@@ -378,39 +383,39 @@ const total = panels.length;
     }, { threshold: 0.15 });
     panels.forEach((p) => { if (p.dataset.video === '1') vio.observe(p); });
 
-    if (reduced) return;
+    // 谁是当前整屏：取覆盖视口最多的那一屏；它进场时做差速动画，离开时复位（复位在屏外，看不见）
+    const states = panels.map((panel) => ({
+      panel,
+      head: panel.querySelector('[data-head]'),
+      rail: panel.querySelector('[data-rail]'),
+      maxMove: 0,
+      railX: 0,
+      railXTarget: 0,
+      front: false,
+    }));
 
-    // 每一屏一个状态：滚动进度 → 标题 -23vh、轨道 60vh→0，带 scrub 追随延迟
-    const states = panels.map((panel) => {
-      return {
-        panel,
-        head: panel.querySelector('[data-head]'),
-        rail: panel.querySelector('[data-rail]'),
-        target: 0,
-        eased: 0,
-        railX: 0,
-        railXTarget: 0,
-      };
-    });
-
-    const SMOOTH = 0.14;     // 每帧逼近比例：≈ 原站 scrub 0.85 的追随感
-    const RAIL_SMOOTH = 0.1; // 横向拖动约 0.5s 追上鼠标
-
+    const RAIL_SMOOTH = 0.1;
     const measure = () => {
-      const vh = window.innerHeight;
+      let best = null;
+      let bestRatio = 0;
       for (const s of states) {
         const r = s.panel.getBoundingClientRect();
-        const range = r.height - vh;                       // 120svh - 100svh ≈ 20svh
-        s.target = range > 0 ? Math.min(1, Math.max(0, -r.top / range)) : (r.top <= 0 ? 1 : 0);
-        // 轨道完全进入 (进度 > 0.85) 之后才允许横向拖动
+        const vh = window.innerHeight;
+        const shown = Math.max(0, Math.min(vh, r.bottom) - Math.max(0, r.top)) / vh;
+        if (shown > bestRatio) { bestRatio = shown; best = s; }
+      }
+      const active = bestRatio > 0.55 ? best : null;
+      for (const s of states) {
         const stage = s.panel.querySelector('.gpanel-stage');
-        const rail = s.rail;
-        const maxMove = Math.max(0, rail.scrollWidth - stage.clientWidth);
-        s.maxMove = maxMove;
+        s.maxMove = Math.max(0, s.rail.scrollWidth - stage.clientWidth);
+        const isFront = s === active;
+        if (isFront === s.front) continue;
+        s.front = isFront;
+        s.panel.classList.toggle('is-front', isFront);
       }
     };
 
-    // 横向拖动只在鼠标真的移动过之后才生效：否则轨道会自己滑到中间
+    // 横向拖动：只作用于当前整屏（需要真的动过鼠标）
     let pointerRatio = 0;
     let pointerSeen = false;
     if (finePointer) {
@@ -423,21 +428,18 @@ const total = panels.length;
 
     const render = () => {
       for (const s of states) {
-        s.eased += (s.target - s.eased) * SMOOTH;
-        if (Math.abs(s.target - s.eased) < 0.0005) s.eased = s.target;
-
-        const headY = -23 * s.eased;                      // 标题上移 23vh
-        const railY = 60 * (1 - s.eased);                 // 轨道 60vh → 0
-        s.head.style.transform = `translate3d(0, ${headY.toFixed(2)}vh, 0)`;
-
-        // 轨道完全进入（进度 > 0.85）且鼠标移动过之后，才按鼠标横向位置拖动
-        const ready = s.eased > 0.85 && (s.maxMove || 0) > 8 && pointerSeen;
+        const ready = s.front && (s.maxMove || 0) > 8 && pointerSeen;
         s.railXTarget = ready ? -s.maxMove * pointerRatio : 0;
         s.railX += (s.railXTarget - s.railX) * RAIL_SMOOTH;
-        s.rail.style.transform = `translate3d(${s.railX.toFixed(1)}px, ${railY.toFixed(2)}vh, 0)`;
+        if (Math.abs(s.railX) > 0.5) s.rail.style.setProperty('--rail-x', s.railX.toFixed(1) + 'px');
       }
       requestAnimationFrame(render);
     };
+
+    window.addEventListener('scroll', measure, { passive: true });
+    window.addEventListener('resize', measure);
+    measure();
+    requestAnimationFrame(render);
 
     // ?debug=1 时把内部状态挂到 window，便于定位问题
     if (new URLSearchParams(location.search).get('debug') === '1') {

@@ -1912,5 +1912,8 @@ html.intro-on .home-intro { display: flex; align-items: center; justify-content:
 
 /* 首页引导页：sticky + 滚动驱动视差（不用 scroll-snap，它会和追随延迟打架）；
    同时隐藏右侧滚动条，保持沉浸感 */
-html.guide-home { scrollbar-width: none; }
+html.guide-home { scrollbar-width: none; scroll-snap-type: y mandatory; }
 html.guide-home::-webkit-scrollbar { width: 0; height: 0; }
+@media (prefers-reduced-motion: reduce) {
+  html.guide-home { scroll-snap-type: none; }
+}
