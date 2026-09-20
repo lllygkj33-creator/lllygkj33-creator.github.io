@@ -1903,8 +1903,4 @@ html.intro-on .home-intro { display: flex; align-items: center; justify-content:
   padding: 0;
 }
 
-/* 首页引导页：整屏纵向贴合滚动（proximity，不抢用户滚动） */
-html.guide-snap { scroll-snap-type: y proximity; }
-@media (prefers-reduced-motion: reduce) {
-  html.guide-snap { scroll-snap-type: none; }
-}
+/* 首页引导页：改为 sticky + 滚动驱动视差，不再用 scroll-snap（它会和追随延迟打架） */

@@ -1,14 +1,16 @@
 ---
-// 首页：9 屏纯色沉浸式引导页（无顶栏、无页脚）
-// 每一屏 = 一个栏目：一个标题 + 几个二级目录（点进去就是该栏目里的真实页面）。
-// 向下滚动时，下一屏用自己的底色从下往上扫过来（与开场第二幕同一质感）。
+// 首页：9 屏沉浸式引导页（无顶栏、无页脚）
+// 滚动模型 = 固定视窗中的短行程滚动驱动差速视差（pinned scroll-scrub，本地实现，无 GSAP）：
+//   容器 120svh / 舞台 sticky 100svh / 真实滚动行程约 20svh
+//   滚动 20svh 时：巨型标题上移 23vh，二级目录卡片组从下方 60vh 升到 0
+//   追随延迟 ≈ scrub 0.85（每帧 lerp 逼近，不是硬跟滚轮）
+//   卡片完全进入后：按鼠标横向位置平滑拖动整条轨道；悬停卡片放大
 import { getNav } from '../../lib/nav';
 
 const nav = await getNav();
 
-// 9 屏配色：酒红 / 米色 / 苹果青 / 墨黑 / 陶土 / 橄榄 / 石板蓝 / 梅紫 / 品牌橙
-// video  : 该屏的背景视频（放在 public/media/home/，留空则用纯色）
-// scrim  : 压在视频上的同色系叠色罩 —— 让视频吃进这一屏的颜色，同时保证文字可读
+// video : 该屏的背景视频（放 public/media/home/，留空则用纯色）
+// scrim : 压在视频上的同色系叠色罩，让视频吃进这一屏的颜色并保证文字可读
 const PALETTE = [
   {
     bg: '#2b0705',
@@ -16,32 +18,36 @@ const PALETTE = [
     accent: '#ff4813',
     video: '/media/home/seo.mp4',
     scrim: 'linear-gradient(180deg, rgba(43,7,5,.78) 0%, rgba(43,7,5,.46) 42%, rgba(43,7,5,.86) 100%)',
-  },   // 01 SEO：酒红 + 橙色字（已接视频背景）
-  { bg: '#efe3cf', ink: '#241f1a', accent: '#b4451f' },   // 02 GEO：米色
-  { bg: '#0e6f6b', ink: '#f2fbf9', accent: '#ffd166' },   // 03 社媒联动：苹果青
-  { bg: '#14161a', ink: '#f2ede3', accent: '#ff4813' },   // 04 Google 算法：墨黑
-  { bg: '#a8452b', ink: '#fdf3e7', accent: '#ffd9a8' },   // 05 内容质量评估：陶土
-  { bg: '#2f3d24', ink: '#eee7d3', accent: '#d9a05b' },   // 06 摩天大楼优化：橄榄
-  { bg: '#26364f', ink: '#eef1f6', accent: '#9fc0ff' },   // 07 链接图谱：石板蓝
-  { bg: '#3b1d33', ink: '#f6e9f1', accent: '#ff8fb8' },   // 08 品牌实体检测：梅紫
-  { bg: '#ff4813', ink: '#1a0a05', accent: '#3b0f04' },   // 09 链接自动化：品牌橙
+  },
+  { bg: '#efe3cf', ink: '#241f1a', accent: '#b4451f' },
+  { bg: '#0e6f6b', ink: '#f2fbf9', accent: '#ffd166' },
+  { bg: '#14161a', ink: '#f2ede3', accent: '#ff4813' },
+  { bg: '#a8452b', ink: '#fdf3e7', accent: '#ffd9a8' },
+  { bg: '#2f3d24', ink: '#eee7d3', accent: '#d9a05b' },
+  { bg: '#26364f', ink: '#eef1f6', accent: '#9fc0ff' },
+  { bg: '#3b1d33', ink: '#f6e9f1', accent: '#ff8fb8' },
+  { bg: '#ff4813', ink: '#1a0a05', accent: '#3b0f04' },
 ];
 
 const panels = nav.slice(0, PALETTE.length).map((section, i) => {
   const entries = [];
-  // 先放各分组的第一个页面（这就是"二级目录"）
   for (const group of section.groups) {
     const first = group.pages[0];
     if (group.label && first) entries.push({ label: group.label, meta: `${group.pages.length} 篇`, url: first.url });
   }
-  // 分组很少的栏目，再补几篇实际页面，保证每屏都有几个入口
   if (entries.length < 4) {
     for (const page of section.pages) {
       if (entries.length >= 5) break;
       if (!entries.some((e) => e.url === page.url)) entries.push({ label: page.title, meta: '', url: page.url });
     }
   }
-  return { section, color: PALETTE[i], entries, no: String(i + 1).padStart(2, '0'), latin: /^[A-Za-z0-9 &]+$/.test(section.label) };
+  return {
+    section,
+    color: PALETTE[i],
+    entries,
+    no: String(i + 1).padStart(2, '0'),
+    latin: /^[A-Za-z0-9 &]+$/.test(section.label),
+  };
 });
 
 const total = panels.length;
@@ -56,43 +62,37 @@ const total = panels.length;
         data-panel={no}
         data-video={color.video ? '1' : undefined}
       >
-        {color.video && (
-          <>
-            <video
-              class="gpanel-video"
-              src={color.video}
-              muted
-              playsinline
-              loop
-              preload="metadata"
-              aria-hidden="true"
-            />
-            <span class="gpanel-scrim" aria-hidden="true" />
-          </>
-        )}
+        <div class="gpanel-stage">
+          {color.video && (
+            <>
+              <video class="gpanel-video" src={color.video} muted playsinline loop preload="metadata" aria-hidden="true" />
+              <span class="gpanel-scrim" aria-hidden="true" />
+            </>
+          )}
 
-        <div class="gpanel-inner">
-          <div class="gpanel-head">
+          <div class="gpanel-head" data-head>
             <span class="gpanel-no">{no}</span>
             <h2 class="gpanel-title" data-latin={latin ? '1' : undefined}>{section.label}</h2>
           </div>
 
-          <ul class="gpanel-sub">
+          <div class="gpanel-rail" data-rail>
             {entries.map((e) => (
-              <li>
-                <a href={e.url}>
-                  <span class="gs-label">{e.label}</span>
-                  {e.meta && <span class="gs-meta">{e.meta}</span>}
-                  <span class="gs-arrow" aria-hidden="true">→</span>
-                </a>
-              </li>
+              <a class="gcard" href={e.url}>
+                <span class="gcard-index" aria-hidden="true">{e.label.slice(0, 2)}</span>
+                <span class="gcard-copy">
+                  <span class="gcard-label">{e.label}</span>
+                  {e.meta && <span class="gcard-meta">{e.meta}</span>}
+                </span>
+              </a>
             ))}
-          </ul>
 
-          <a class="gpanel-enter" href={section.url}>
-            进入 {section.label}
-            <span aria-hidden="true">→</span>
-          </a>
+            <a class="gcard gcard-enter" href={section.url}>
+              <span class="gcard-copy">
+                <span class="gcard-label">进入 {section.label}</span>
+                <span class="gcard-meta">该栏全部内容 →</span>
+              </span>
+            </a>
+          </div>
 
           <span class="gpanel-count" aria-hidden="true">{no} / {String(total).padStart(2, '0')}</span>
           {no === '01' && <span class="gpanel-hint" aria-hidden="true">向下滚动 ↓</span>}
@@ -105,34 +105,23 @@ const total = panels.length;
 <style>
   .guide { background: var(--bg); }
 
+  /* 容器 120svh，舞台 100svh sticky：真实滚动行程 = 20svh */
   .gpanel {
     position: relative;
-    min-height: 100vh;
-    min-height: 100svh;
-    display: grid;
-    place-items: center;
-    overflow: hidden;
-    scroll-snap-align: start;
+    height: 120vh;
+    height: 120svh;
     background: var(--bg);
     color: var(--ink);
   }
-
-  /* 下一屏用自己的底色扫过来 → 每次滚动都是一次纯色揭页 */
-  .gpanel::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 3;
-    pointer-events: none;
+  .gpanel-stage {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100svh;
+    overflow: hidden;
     background: var(--bg);
-    clip-path: inset(0 0 0 0);
-  }
-  .gpanel.is-in::before {
-    clip-path: inset(0 0 100% 0);
-    transition: clip-path 900ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  /* 背景视频：铺满整屏；不铺满的边用底色兜住 */
   .gpanel-video {
     position: absolute;
     inset: 0;
@@ -144,7 +133,6 @@ const total = panels.length;
     transition: opacity 900ms ease;
   }
   .gpanel-video.is-ready { opacity: 1; }
-  /* 同色系叠色罩：视频吃进这一屏的颜色，文字仍然压得住 */
   .gpanel-scrim {
     position: absolute;
     inset: 0;
@@ -153,31 +141,29 @@ const total = panels.length;
     pointer-events: none;
   }
 
-  .gpanel-inner {
-    position: relative;
+  /* 巨型标题层：滚动 20svh 期间上移 23vh */
+  .gpanel-head {
+    position: absolute;
+    inset: 0;
     z-index: 2;
-    width: 100%;
-    max-width: 74rem;
-    padding: 6rem 3rem;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    padding: 0 3rem;
+    will-change: transform;
   }
-  .gpanel > .gpanel-inner {
-    opacity: 0;
-    transform: translateY(28px);
-    transition: opacity 620ms ease, transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  .gpanel.is-in > .gpanel-inner { opacity: 1; transform: none; }
-
-  .gpanel-head { display: flex; align-items: baseline; gap: 1.25rem; flex-wrap: wrap; }
   .gpanel-no {
     font-family: var(--mono);
     font-size: 0.8125rem;
     letter-spacing: 0.18em;
     color: var(--accent);
+    align-self: center;
   }
   .gpanel-title {
     margin: 0;
     color: var(--ink);
-    font-size: clamp(2.6rem, 9vw, 7.5rem);
+    font-size: clamp(2.6rem, 10vw, 8.5rem);
     font-weight: 700;
     letter-spacing: -0.03em;
     line-height: 0.95;
@@ -190,54 +176,78 @@ const total = panels.length;
     letter-spacing: -0.02em;
   }
 
-  .gpanel-sub { list-style: none; margin: 2.75rem 0 0; padding: 0; max-width: 46rem; }
-  .gpanel-sub li { border-top: 1px solid color-mix(in srgb, var(--ink) 26%, transparent); }
-  .gpanel-sub a:visited { color: var(--ink); }
-  .gpanel-sub a {
-    color: var(--ink);
+  /* 二级目录卡片轨道：从下方 60vh 升到 0 */
+  .gpanel-rail {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    z-index: 2;
     display: flex;
-    align-items: baseline;
-    gap: 1rem;
-    padding: 0.85rem 0;
-    font-size: 0.9375rem;
-    transition: padding 320ms cubic-bezier(0.22, 1, 0.36, 1), opacity 200ms ease;
+    align-items: flex-end;
+    gap: 1.25rem;
+    width: max-content;
+    padding: 0 3rem 5vh;
+    will-change: transform;
   }
-  .gpanel-sub a:hover { padding-left: 0.6rem; }
-  .gs-label { flex: 1; font-weight: 600; }
-  .gs-meta { font-size: 0.75rem; opacity: 0.6; }
-  .gs-arrow { opacity: 0; transform: translateX(-4px); transition: opacity 240ms ease, transform 240ms ease; color: var(--accent); }
-  .gpanel-sub a:hover .gs-arrow { opacity: 1; transform: none; }
 
-  .gpanel-enter {
-    color: var(--ink);
-    display: inline-flex;
+  .gcard {
+    position: relative;
+    flex: 0 0 auto;
+    display: flex;
     align-items: center;
-    gap: 0.5rem;
-    margin-top: 2.5rem;
-    padding: 0.55rem 1.1rem;
-    border: 1px solid color-mix(in srgb, var(--ink) 34%, transparent);
-    border-radius: 999px;
-    font-size: 0.875rem;
-    transition: transform 260ms ease, border-color 260ms ease;
+    justify-content: center;
+    width: 26vh;
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--ink) 26%, transparent);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--ink) 8%, transparent);
+    color: var(--ink);
+    transition: width 0.55s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease;
   }
-  .gpanel-enter:hover { transform: translateY(-1px); border-color: var(--accent); }
-  .gpanel-enter span { color: var(--accent); }
+  .gcard.is-active { width: 34vh; border-color: var(--accent); }
+  .gcard.is-near1 { width: 30vh; }
+  .gcard.is-near2 { width: 28vh; }
+  .gcard-index {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.9rem;
+    font-family: var(--display);
+    font-style: italic;
+    font-synthesis: none;
+    font-size: 1.25rem;
+    opacity: 0.4;
+  }
+  .gcard-copy {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 1rem;
+    text-align: center;
+    pointer-events: none;
+  }
+  .gcard-label { font-size: 0.9375rem; font-weight: 600; }
+  .gcard-meta { font-size: 0.75rem; opacity: 0.65; }
+  .gcard-enter { background: color-mix(in srgb, var(--accent) 16%, transparent); }
 
   .gpanel-count {
-    color: var(--ink);
     position: absolute;
     right: 3rem;
-    bottom: 2.5rem;
+    top: 2.5rem;
+    z-index: 3;
+    color: var(--ink);
     font-family: var(--mono);
     font-size: 0.75rem;
     letter-spacing: 0.14em;
     opacity: 0.55;
   }
   .gpanel-hint {
-    color: var(--ink);
     position: absolute;
     left: 3rem;
     bottom: 2.5rem;
+    z-index: 3;
+    color: var(--ink);
     font-size: 0.6875rem;
     letter-spacing: 0.2em;
     text-transform: uppercase;
@@ -245,56 +255,145 @@ const total = panels.length;
   }
 
   @media (max-width: 900px) {
-    .gpanel-inner { padding: 4.5rem 1.5rem; }
+    .gpanel-head { padding: 0 1.5rem; }
+    .gpanel-rail { gap: 0.9rem; padding: 0 1.5rem 4vh; }
+    .gcard { width: 22vh; }
+    .gcard.is-active { width: 28vh; }
+    .gcard.is-near1 { width: 25vh; }
+    .gcard.is-near2 { width: 23vh; }
     .gpanel-count { right: 1.5rem; }
     .gpanel-hint { left: 1.5rem; }
   }
 
+  /* 减少动效：不留 sticky 行程，直接静态呈现 */
   @media (prefers-reduced-motion: reduce) {
-    .gpanel::before { display: none; }
-    .gpanel > .gpanel-inner { opacity: 1; transform: none; transition: none; }
+    .gpanel { height: 100vh; height: 100svh; }
+    .gpanel-stage { position: relative; }
+    .gpanel-head, .gpanel-rail { transform: none !important; }
+    .gpanel-rail { position: static; padding: 0 1.5rem 4vh; }
   }
 </style>
 
 <script>
   const init = () => {
     const guide = document.getElementById('guide');
-    const root = document.documentElement;
-    if (!guide) { root.classList.remove('guide-snap'); return; }
+    if (!guide) return;
 
-    const panels = [...guide.querySelectorAll('.gpanel')];
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const finePointer = window.matchMedia('(pointer: fine)').matches;
+    const panels = [...guide.querySelectorAll('.gpanel')];
 
-    if (reduced) {
-      panels.forEach((p) => p.classList.add('is-in'));
-    } else {
-      const io = new IntersectionObserver((entries) => {
-        entries.forEach((e) => {
-          if (!e.isIntersecting) return;
-          e.target.classList.add('is-in');
-          io.unobserve(e.target);
-        });
-      }, { threshold: 0.3 });
-      panels.forEach((p) => io.observe(p));
+    // 背景视频：进入这一屏才播放，离开暂停
+    const vio = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        const video = e.target.querySelector('.gpanel-video');
+        if (!video) return;
+        if (e.isIntersecting) {
+          video.classList.add('is-ready');
+          const p = video.play();
+          if (p && typeof p.catch === 'function') p.catch(() => {});
+        } else {
+          video.pause();
+        }
+      });
+    }, { threshold: 0.15 });
+    panels.forEach((p) => { if (p.dataset.video === '1') vio.observe(p); });
 
-      // 视频背景：进入这一屏才播放，离开就暂停；加载好再淡入（底色兜住加载中）
-      const vio = new IntersectionObserver((entries) => {
-        entries.forEach((e) => {
-          const video = e.target.querySelector('.gpanel-video');
-          if (!video) return;
-          if (e.isIntersecting) {
-            video.classList.add('is-ready');
-            const p = video.play();
-            if (p && typeof p.catch === 'function') p.catch(() => {});
-          } else {
-            video.pause();
-          }
+    // 卡片：悬停放大（中心 34vh / 近邻 30vh / 次邻 28vh），并作为指针跟随的锚点
+    const setupRail = (panel) => {
+      const cards = [...panel.querySelectorAll('.gcard')];
+      const activate = (active) => {
+        cards.forEach((card, i) => {
+          const d = Math.abs(i - active);
+          card.classList.toggle('is-active', d === 0);
+          card.classList.toggle('is-near1', d === 1);
+          card.classList.toggle('is-near2', d === 2);
         });
-      }, { threshold: 0.15 });
-      panels.forEach((p) => { if (p.dataset.video === '1') vio.observe(p); });
+      };
+      cards.forEach((card, i) => card.addEventListener('mouseenter', () => activate(i)));
+      activate(Math.min(1, cards.length - 1));
+      return cards;
+    };
+
+    if (reduced) return;
+
+    // 每一屏一个状态：滚动进度 → 标题 -23vh、轨道 60vh→0，带 scrub 追随延迟
+    const states = panels.map((panel) => {
+      setupRail(panel);
+      return {
+        panel,
+        head: panel.querySelector('[data-head]'),
+        rail: panel.querySelector('[data-rail]'),
+        target: 0,
+        eased: 0,
+        railX: 0,
+        railXTarget: 0,
+      };
+    });
+
+    const SMOOTH = 0.14;     // 每帧逼近比例：≈ 原站 scrub 0.85 的追随感
+    const RAIL_SMOOTH = 0.1; // 横向拖动约 0.5s 追上鼠标
+
+    const measure = () => {
+      const vh = window.innerHeight;
+      for (const s of states) {
+        const r = s.panel.getBoundingClientRect();
+        const range = r.height - vh;                       // 120svh - 100svh ≈ 20svh
+        s.target = range > 0 ? Math.min(1, Math.max(0, -r.top / range)) : (r.top <= 0 ? 1 : 0);
+        // 轨道完全进入 (进度 > 0.85) 之后才允许横向拖动
+        const stage = s.panel.querySelector('.gpanel-stage');
+        const rail = s.rail;
+        const maxMove = Math.max(0, rail.scrollWidth - stage.clientWidth);
+        s.maxMove = maxMove;
+      }
+    };
+
+    // 横向拖动只在鼠标真的移动过之后才生效：否则轨道会自己滑到中间
+    let pointerRatio = 0;
+    let pointerSeen = false;
+    if (finePointer) {
+      guide.addEventListener('pointermove', (event) => {
+        const rect = event.currentTarget.getBoundingClientRect();
+        pointerRatio = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
+        pointerSeen = true;
+      });
     }
 
-    root.classList.add('guide-snap');
+    const render = () => {
+      for (const s of states) {
+        s.eased += (s.target - s.eased) * SMOOTH;
+        if (Math.abs(s.target - s.eased) < 0.0005) s.eased = s.target;
+
+        const headY = -23 * s.eased;                      // 标题上移 23vh
+        const railY = 60 * (1 - s.eased);                 // 轨道 60vh → 0
+        s.head.style.transform = `translate3d(0, ${headY.toFixed(2)}vh, 0)`;
+
+        // 轨道完全进入（进度 > 0.85）且鼠标移动过之后，才按鼠标横向位置拖动
+        const ready = s.eased > 0.85 && (s.maxMove || 0) > 8 && pointerSeen;
+        s.railXTarget = ready ? -s.maxMove * pointerRatio : 0;
+        s.railX += (s.railXTarget - s.railX) * RAIL_SMOOTH;
+        s.rail.style.transform = `translate3d(${s.railX.toFixed(1)}px, ${railY.toFixed(2)}vh, 0)`;
+      }
+      requestAnimationFrame(render);
+    };
+
+    // ?debug=1 时把内部状态挂到 window，便于定位问题
+    if (new URLSearchParams(location.search).get('debug') === '1') {
+      window.__guide = { states, measure };
+    }
+
+    window.addEventListener('scroll', measure, { passive: true });
+    window.addEventListener('resize', measure);
+    measure();
+    requestAnimationFrame(render);
+
+    // ?goto=bottom 直接平滑滑到最后一屏（方便给别人看最终状态）
+    const goto = new URLSearchParams(location.search).get('goto');
+    if (goto === 'bottom') window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    else if (/^[1-9]$/.test(goto || '')) {
+      const target = panels[Number(goto) - 1];
+      if (target) window.scrollTo({ top: target.offsetTop + target.offsetHeight * 0.5, behavior: 'smooth' });
+    }
   };
 
   init();
