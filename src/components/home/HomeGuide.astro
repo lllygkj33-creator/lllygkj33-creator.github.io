@@ -12,21 +12,15 @@ const nav = await getNav();
 // video : 该屏的背景视频（放 public/media/home/，留空则用纯色）
 // scrim : 压在视频上的同色系叠色罩，让视频吃进这一屏的颜色并保证文字可读
 const PALETTE = [
-  {
-    bg: '#2b0705',
-    ink: '#ff4813',
-    accent: '#ff4813',
-    video: '/media/home/seo.mp4',
-    scrim: 'linear-gradient(180deg, rgba(43,7,5,.78) 0%, rgba(43,7,5,.46) 42%, rgba(43,7,5,.86) 100%)',
-  },
-  { bg: '#efe3cf', ink: '#241f1a', accent: '#b4451f' },
-  { bg: '#0e6f6b', ink: '#f2fbf9', accent: '#ffd166' },
-  { bg: '#14161a', ink: '#f2ede3', accent: '#ff4813' },
-  { bg: '#a8452b', ink: '#fdf3e7', accent: '#ffd9a8' },
-  { bg: '#2f3d24', ink: '#eee7d3', accent: '#d9a05b' },
-  { bg: '#26364f', ink: '#eef1f6', accent: '#9fc0ff' },
-  { bg: '#3b1d33', ink: '#f6e9f1', accent: '#ff8fb8' },
-  { bg: '#ff4813', ink: '#1a0a05', accent: '#3b0f04' },
+  { bg: '#2b0705', video: '/media/home/seo.mp4' },
+  { bg: '#efe3cf', video: '/media/home/geo.mp4' },
+  { bg: '#0e6f6b', video: '/media/home/social.mp4' },
+  { bg: '#14161a', video: '/media/home/google-algorithm.mp4' },
+  { bg: '#a8452b', video: '/media/home/content-quality.mp4' },
+  { bg: '#2f3d24', video: '/media/home/skyscraper.mp4' },
+  { bg: '#26364f', video: '/media/home/link-graph.mp4' },
+  { bg: '#3b1d33', video: '/media/home/brand-entity-audit.mp4' },
+  { bg: '#ff4813', video: '/media/home/link-automation.mp4' },
 ];
 
 // 判断底色深浅：浅色底上白字读不出来，自动压一层暗罩
@@ -51,10 +45,9 @@ const panels = nav.slice(0, PALETTE.length).map((section, i) => {
   }
   // 白字方案：底色越浅，压暗越重（深色底给一点点，避免纯黑更沉）
   const lum = luminance(PALETTE[i].bg);
-  const dim = lum > 0.55 ? 0.52 : lum > 0.3 ? 0.3 : lum > 0.12 ? 0.16 : 0;
-  const textScrim = dim
-    ? `linear-gradient(180deg, rgba(0,0,0,${(dim * 0.7).toFixed(2)}) 0%, rgba(0,0,0,${(dim * 0.35).toFixed(2)}) 45%, rgba(0,0,0,${dim.toFixed(2)}) 100%)`
-    : null;
+  const base = lum > 0.55 ? 0.52 : lum > 0.3 ? 0.34 : lum > 0.12 ? 0.26 : 0.2;
+  const dim = Math.max(base, PALETTE[i].video ? 0.34 : 0);   // 视频屏再兜一层，保证白字
+  const textScrim = `linear-gradient(180deg, rgba(0,0,0,${(dim * 0.72).toFixed(2)}) 0%, rgba(0,0,0,${(dim * 0.4).toFixed(2)}) 42%, rgba(0,0,0,${(dim * 1.05).toFixed(2)}) 100%)`;
 
   return {
     section,
@@ -94,20 +87,15 @@ const total = panels.length;
 
           <div class="gpanel-rail" data-rail>
             {entries.map((e) => (
-              <a class="gcard" href={e.url}>
-                <span class="gcard-index" aria-hidden="true">{e.label.slice(0, 2)}</span>
-                <span class="gcard-copy">
-                  <span class="gcard-label">{e.label}</span>
-                  {e.meta && <span class="gcard-meta">{e.meta}</span>}
-                </span>
+              <a class="gline" href={e.url}>
+                <span class="gline-label">{e.label}</span>
+                <span class="gline-arrow" aria-hidden="true">→</span>
               </a>
             ))}
 
-            <a class="gcard gcard-enter" href={section.url}>
-              <span class="gcard-copy">
-                <span class="gcard-label">进入 {section.label}</span>
-                <span class="gcard-meta">该栏全部内容 →</span>
-              </span>
+            <a class="gline gline-enter" href={section.url}>
+              <span class="gline-label">进入 {section.label}</span>
+              <span class="gline-arrow" aria-hidden="true">→</span>
             </a>
           </div>
 
@@ -214,46 +202,34 @@ const total = panels.length;
     will-change: transform;
   }
 
-  .gcard {
-    position: relative;
+  /* 一条横线 + 白色斜体字（中文也走斜体，浏览器会对中日韩字形做倾斜） */
+  .gline {
     flex: 0 0 auto;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 26vh;
-    aspect-ratio: 3 / 2;
-    overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.28);
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.08);
-    color: #fff;
-    transition: width 0.55s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease;
-  }
-  .gcard.is-active { width: 34vh; border-color: rgba(255, 255, 255, 0.85); }
-  .gcard.is-near1 { width: 30vh; }
-  .gcard.is-near2 { width: 28vh; }
-  .gcard-index {
-    position: absolute;
-    top: 0.75rem;
-    left: 0.9rem;
-    font-family: var(--display);
-    font-style: italic;
-    font-synthesis: none;
-    font-size: 1.25rem;
-    opacity: 0.4;
-  }
-  .gcard-copy {
-    display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 1rem;
-    text-align: center;
-    pointer-events: none;
+    gap: 0.45rem;
+    min-width: 10rem;
+    padding-top: 0.7rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.42);
+    color: #fff;
+    font-style: italic;
+    font-size: 1rem;
+    letter-spacing: 0.01em;
+    transition: border-color 320ms ease;
   }
-  .gcard-label { font-size: 0.9375rem; font-weight: 600; }
-  .gcard-meta { font-size: 0.75rem; opacity: 0.65; }
-  .gcard-enter { background: color-mix(in srgb, #fff 14%, transparent); }
+  .gline:hover,
+  .gline:focus-visible { border-color: rgba(255, 255, 255, 0.95); }
+  .gline-label { white-space: nowrap; }
+  .gline-arrow {
+    font-size: 0.8125rem;
+    font-style: normal;
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity 240ms ease, transform 240ms ease;
+  }
+  .gline:hover .gline-arrow,
+  .gline:focus-visible .gline-arrow { opacity: 1; transform: none; }
+  .gline-enter { min-width: auto; }
 
   .gpanel-count {
     position: absolute;
@@ -280,11 +256,8 @@ const total = panels.length;
 
   @media (max-width: 900px) {
     .gpanel-head { padding: 0 1.5rem; }
-    .gpanel-rail { gap: 0.9rem; padding: 0 1.5rem 4vh; }
-    .gcard { width: 22vh; }
-    .gcard.is-active { width: 28vh; }
-    .gcard.is-near1 { width: 25vh; }
-    .gcard.is-near2 { width: 23vh; }
+    .gpanel-rail { flex-wrap: wrap; width: 100%; gap: 1.1rem 1.6rem; padding: 0 1.5rem 4vh; }
+    .gline { min-width: 7rem; font-size: 0.9375rem; }
     .gpanel-count { right: 1.5rem; }
     .gpanel-hint { left: 1.5rem; }
   }
@@ -324,27 +297,10 @@ const total = panels.length;
     }, { threshold: 0.15 });
     panels.forEach((p) => { if (p.dataset.video === '1') vio.observe(p); });
 
-    // 卡片：悬停放大（中心 34vh / 近邻 30vh / 次邻 28vh），并作为指针跟随的锚点
-    const setupRail = (panel) => {
-      const cards = [...panel.querySelectorAll('.gcard')];
-      const activate = (active) => {
-        cards.forEach((card, i) => {
-          const d = Math.abs(i - active);
-          card.classList.toggle('is-active', d === 0);
-          card.classList.toggle('is-near1', d === 1);
-          card.classList.toggle('is-near2', d === 2);
-        });
-      };
-      cards.forEach((card, i) => card.addEventListener('mouseenter', () => activate(i)));
-      activate(Math.min(1, cards.length - 1));
-      return cards;
-    };
-
     if (reduced) return;
 
     // 每一屏一个状态：滚动进度 → 标题 -23vh、轨道 60vh→0，带 scrub 追随延迟
     const states = panels.map((panel) => {
-      setupRail(panel);
       return {
         panel,
         head: panel.querySelector('[data-head]'),
